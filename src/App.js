@@ -1,26 +1,34 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { Component } from 'react';
+//import { withRouter } from 'react-router';
+import { connect } from 'react-redux';
+import { error, info } from './appActions';
+import { Route, Redirect } from 'react-router-dom';
+import Topics from './app/topics';
+import Topic from './app/topics/topic';
+import Idea from './app/ideas/idea';
 import './App.css';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+class App extends Component {
+	render() {
+		const { ui } = this.props;
+
+		return (
+			<div className='adaptation'>
+				{ui.isLoading && <div>Загрузка данных</div>}
+				{!!ui.error && <div>error</div>}
+				<Route exact path='/' render={() => <Redirect to='/topics' />} />
+				<Route exact path='/topics' component={Topics}/>
+				<Route exact path='/topics/:id' component={Topic}/>
+				<Route exact path='/topics/:topicId/ideas/:id' component={Idea}/>
+			</div>
+		);
+	}
 }
 
-export default App;
+function mapStateToProps(state){
+	return {
+		ui: state.app.ui
+	}
+}
+
+export default connect(mapStateToProps, { error })(App);
