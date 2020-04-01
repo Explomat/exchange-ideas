@@ -1,17 +1,18 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { List, Avatar, Icon, Card } from 'antd';
+import { List, Avatar, Icon, Card, Input, Button } from 'antd';
+import Rate from '../components/rate';
 import { Link } from 'react-router-dom';
 //import { MessageOutlined, StarOutlined } from '@ant-design/icons';
 
-import { StarOutlined, StarFilled, StarTwoTone } from '@ant-design/icons';
+//import { StarOutlined, StarFilled, StarTwoTone } from '@ant-design/icons';
 
-import { getTopics } from './topicsActions';
+import { getTopics, removeTopic, newTopic, rateTopic } from './topicsActions';
 import './index.css';
 
-const IconText = ({ type, text }) => (
+const IconText = ({ type, text, ...props }) => (
 	<span>
-		<Icon type={type} style={{ marginRight: 8 }} />
+		<Icon type={type} style={{ marginRight: 8 }} onClick={props.onClick}/>
 		{text}
 	</span>
 );
@@ -20,14 +21,48 @@ class Topics extends Component {
 
 	constructor(props){
 		super(props);
+
+		this.handleChangeAddTitle = this.handleChangeAddTitle.bind(this);
+		this.handleChangeAddDescription = this.handleChangeAddDescription.bind(this);
+		this.handleAdd = this.handleAdd.bind(this);
+
+		this.state = {
+			addTextTitle: '',
+			addTextDescription: ''
+		}
 	}
 
 	componentDidMount(){
 		this.props.getTopics();
 	}
 
+	handleChangeAddTitle(e) {
+		this.setState({
+			addTextTitle: e.target.value
+		});
+	}
+
+	handleChangeAddDescription(e) {
+		this.setState({
+			addTextDescription: e.target.value
+		});
+	}
+
+	handleAdd() {
+		const { addTextTitle, addTextDescription } = this.state;
+		const { match, newTopic} = this.props;
+
+		newTopic(addTextTitle, addTextDescription);
+
+		this.setState({
+			addTextTitle: '',
+			addTextDescription: ''
+		});
+	}
+
 	render() {
-		const { topics } = this.props;
+		const { topics, removeTopic, rateTopic } = this.props;
+		const { addTextTitle, addTextDescription } = this.state;
 
 		return (
 			<Card className='topics'>
@@ -46,7 +81,9 @@ class Topics extends Component {
 							<List.Item
 								key={item.title}
 								actions={[
-									<IconText type='star-o' text={item.rate} key='list-vertical-star-o' />
+									<Rate text={parseInt(item.rate, 10)} onChange={val => rateTopic(item.id, val)}/>,
+									<IconText type='alert' text={item.ideas_count} key='list-vertical-alert' />,
+									<IconText type='delete' key='list-vertical-remove-o' onClick={(() => removeTopic(item.id))}/>
 								]}
 								extra={
 									<img
@@ -66,6 +103,13 @@ class Topics extends Component {
 					})}
 
 				</List>
+
+				<div>
+					<h3>Добавить новую тему</h3>
+					<Input value={addTextTitle} placeholder='Название' onChange={this.handleChangeAddTitle}/>
+					<Input.TextArea value={addTextDescription} placeholder='Описание' onChange={this.handleChangeAddDescription}/>
+					<Button type='primary' onClick={this.handleAdd}>Добавить</Button>
+				</div>
 			</Card>
 		);
 	}
@@ -77,4 +121,4 @@ function mapStateToProps(state){
 	}
 }
 
-export default connect(mapStateToProps, { getTopics })(Topics);
+export default connect(mapStateToProps, { getTopics, removeTopic, newTopic, rateTopic })(Topics);

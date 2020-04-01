@@ -7,12 +7,12 @@ const listReducer = (state = [], action) => {
 		}
 
 		case constants.TOPICS_REMOVE_SUCCESS: {
-			const id = action.id;
+			const id = action.payload.id;
 			return state.filter(t => t.id !== id);
 		}
 
 		case constants.TOPICS_EDIT_SUCCESS: {
-			const id = action.id;
+			const id = action.payload.id;
 			return state.map(t => {
 				if (t.id === id){
 					return action.payload;
@@ -43,6 +43,18 @@ const topicsReducer = (state = {
 			return {
 				...state,
 				currentTopic: action.payload
+			}
+		}
+
+		case constants.TOPICS_CHANGE: {
+			const { data } = action.payload;
+
+			return {
+				...state,
+				currentTopic: {
+					...state.currentTopic,
+					...data
+				}
 			}
 		}
 

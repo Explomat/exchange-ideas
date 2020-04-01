@@ -10,7 +10,7 @@ function log(message){
 function setMessage(type, message){
 	return {
 		type: type,
-		message: message
+		message: String(message)
 	}
 }
 
@@ -49,6 +49,57 @@ function toJSArray(xmlArray) {
 	return returnArr;
 }
 
+function listToTree(list, sortFieldName) {
+
+	function sortTree(_tree, fieldName){
+		_tree = ArraySort(_tree, fieldName, '+');
+		var queue = [];
+		for (var i = 0; i < _tree.length; i++) {
+			queue.push(_tree[i]);
+		}
+		var index = queue.length - 1;
+
+		while (index >= 0) {
+			u = queue[index];
+			index = index - 1;
+
+			if (u.GetOptProperty('children') == undefined) {
+				u.SetProperty('children', []);
+			}
+
+			u.children = ArraySort(u.children, fieldName, '+');
+			for (i = 0; i < u.children.length; i++) {
+				index = index + 1;
+				queue[index] = u.children[i];
+			}
+		}
+		return _tree;
+	}
+
+	var map = {};
+	var roots = [];
+
+	for (i = 0; i < list.length; i += 1) {
+		map[list[i].id] = i;
+	}
+
+	for (i = 0; i < list.length; i += 1) {
+		node = list[i];
+
+		parentId = node.GetOptProperty('parent_id');
+		if (parentId != '' && parentId != undefined) {
+			l = list[map[node.parent_id]];
+			if (l.GetOptProperty('children') == undefined) {
+				l.SetProperty('children', []);
+			}
+			l.children.push(node);
+		} else {
+			roots.push(node);
+		}
+	}
+	return sortTree(roots, sortFieldName);
+}
+
 function createResourseWithImage(userId, userFullname, fileName, fileType, imageBinary) {
 	var docResource = tools.new_doc_by_name('resource'); 
 	docResource.TopElem.person_id = userId; 
@@ -63,4 +114,8 @@ function createResourseWithImage(userId, userFullname, fileName, fileType, image
 	docResource.Save();
 
 	return docResource;
+}
+
+function computeRate(value, count) {
+	return value / count;
 }

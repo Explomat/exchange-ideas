@@ -1,15 +1,15 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
-import { List, Avatar, Icon, Card } from 'antd';
+import { List, Avatar, Icon, Card, Input, Button } from 'antd';
 import { Link } from 'react-router-dom';
 
-import { getIdeas } from './ideasActions';
+import { getIdeas, removeIdea, newIdea } from './ideasActions';
 //import './index.css';
 
-const IconText = ({ type, text }) => (
+const IconText = ({ type, text, ...props }) => (
 	<span>
-		<Icon type={type} style={{ marginRight: 8 }} />
+		<Icon type={type} style={{ marginRight: 8 }} onClick={props.onClick}/>
 		{text}
 	</span>
 );
@@ -18,6 +18,15 @@ class Ideas extends Component {
 
 	constructor(props){
 		super(props);
+
+		this.handleChangeAddTitle = this.handleChangeAddTitle.bind(this);
+		this.handleChangeAddDescription = this.handleChangeAddDescription.bind(this);
+		this.handleAdd = this.handleAdd.bind(this);
+
+		this.state = {
+			addTextTitle: '',
+			addTextDescription: ''
+		}
 	}
 
 	componentDidMount(){
@@ -25,8 +34,33 @@ class Ideas extends Component {
 		getIdeas(match.params.id);
 	}
 
+	handleChangeAddTitle(e) {
+		this.setState({
+			addTextTitle: e.target.value
+		});
+	}
+
+	handleChangeAddDescription(e) {
+		this.setState({
+			addTextDescription: e.target.value
+		});
+	}
+
+	handleAdd() {
+		const { addTextTitle, addTextDescription } = this.state;
+		const { match, newIdea} = this.props;
+
+		newIdea(addTextTitle, addTextDescription, match.params.id);
+
+		this.setState({
+			addTextTitle: '',
+			addTextDescription: ''
+		});
+	}
+
 	render() {
-		const { ideas, match } = this.props;
+		const { ideas, match, removeIdea } = this.props;
+		const { addTextTitle, addTextDescription } = this.state;
 
 		return (
 			<Card className='ideas'>
@@ -44,7 +78,9 @@ class Ideas extends Component {
 							<List.Item
 								key={item.title}
 								actions={[
-									<IconText type='like' text={item.rate} key='list-vertical-star-o' />
+									<IconText type='star-o' text={item.rate} key='list-vertical-star-o' />,
+									<IconText type='message' text={item.comments_count} key='list-vertical-message' />,
+									<IconText type='delete' key='list-vertical-remove-o' onClick={(() => removeIdea(item.id))}/>
 								]}
 							>
 								<List.Item.Meta
@@ -57,6 +93,13 @@ class Ideas extends Component {
 					})}
 
 				</List>
+
+				<div>
+					<h3>Добавить новую идею</h3>
+					<Input value={addTextTitle} placeholder='Название' onChange={this.handleChangeAddTitle}/>
+					<Input.TextArea value={addTextDescription} placeholder='Описание' onChange={this.handleChangeAddDescription}/>
+					<Button type='primary' onClick={this.handleAdd}>Добавить</Button>
+				</div>
 			</Card>
 		);
 	}
@@ -68,4 +111,4 @@ function mapStateToProps(state){
 	}
 }
 
-export default withRouter(connect(mapStateToProps, { getIdeas })(Ideas));
+export default withRouter(connect(mapStateToProps, { getIdeas, removeIdea, newIdea })(Ideas));

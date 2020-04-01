@@ -7,8 +7,17 @@ const listReducer = (state = [], action) => {
 		}
 
 		case constants.COMMENTS_REMOVE_SUCCESS: {
-			const id = action.payload.id;
-			return state.filter(t => t.id !== id);
+			const ids = action.payload;
+			var newState = state.filter(t => {
+				for (let i = ids.length - 1; i >= 0; i--) {
+					if (t.id === ids[i]) {
+						return false;
+					}
+				}
+				return true;
+			});
+
+			return newState;
 		}
 
 		case constants.COMMENTS_EDIT_SUCCESS: {
@@ -32,9 +41,10 @@ const commentsReducer = (state = {
 }, action) => {
 	switch(action.type) {
 		case constants.COMMENTS_FETCH_SUCCESS: {
+			const { comments } = action.payload;
 			return {
 				...state,
-				list: action.payload
+				list: comments
 			}
 		}
 

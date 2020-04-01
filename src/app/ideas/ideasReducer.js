@@ -7,12 +7,12 @@ const listReducer = (state = [], action) => {
 		}
 
 		case constants.IDEAS_REMOVE_SUCCESS: {
-			const id = action.id;
+			const id = action.payload.id;
 			return state.filter(t => t.id !== id);
 		}
 
 		case constants.IDEAS_EDIT_SUCCESS: {
-			const id = action.id;
+			const id = action.payload.id;
 			return state.map(t => {
 				if (t.id === id){
 					return action.payload;
@@ -24,7 +24,7 @@ const listReducer = (state = [], action) => {
 	}
 }
 
-const topicsReducer = (state = {
+const ideasReducer = (state = {
 	list: [],
 	currentIdea: {},
 	ui: {
@@ -46,12 +46,24 @@ const topicsReducer = (state = {
 			}
 		}
 
-		case constants.IDEA_ADD_SUCCESS:
-		case constants.IDEA_REMOVE_SUCCESS:
-		case constants.IDEA_EDIT_SUCCESS: {
+		case constants.IDEAS_ADD_SUCCESS:
+		case constants.IDEAS_REMOVE_SUCCESS:
+		case constants.IDEAS_EDIT_SUCCESS: {
 			return {
 				...state,
 				list: listReducer(state.list, action)
+			}
+		}
+
+		case constants.IDEAS_CHANGE: {
+			const { data } = action.payload;
+
+			return {
+				...state,
+				currentIdea: {
+					...state.currentIdea,
+					...data
+				}
 			}
 		}
 
@@ -69,4 +81,4 @@ const topicsReducer = (state = {
 	}
 }
 
-export default topicsReducer;
+export default ideasReducer;

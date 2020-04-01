@@ -24,9 +24,58 @@ export function removeComment(id) {
 				}
 				dispatch({
 					type: constants.COMMENTS_REMOVE_SUCCESS,
-					payload: {
-						id
-					}
+					payload: d.data
+				});
+			})
+			.catch(e => {
+				console.error(e);
+				dispatch(error(e.message));
+			});
+	}
+}
+
+export function likeComment(id) {
+	return (dispatch) => {
+		request('CommentsLike')
+			.post({ id })
+			.then(r => r.json())
+			.then(d => {
+				if (d.type === 'error'){
+					throw d;
+				}
+				dispatch({
+					type: constants.COMMENTS_EDIT_SUCCESS,
+					payload: d.data
+				});
+			})
+			.catch(e => {
+				console.error(e);
+				dispatch(error(e.message));
+			});
+	}
+}
+
+export function newComment(text, ideaId, parentId) {
+	return (dispatch) => {
+		var obj = {
+			text,
+			idea_id: ideaId
+		};
+		if (parentId) {
+			obj.parent_id = parentId;
+		}
+
+
+		request('Comments')
+			.post(obj)
+			.then(r => r.json())
+			.then(d => {
+				if (d.type === 'error'){
+					throw d;
+				}
+				dispatch({
+					type: constants.COMMENTS_ADD_SUCCESS,
+					payload: d.data
 				});
 			})
 			.catch(e => {

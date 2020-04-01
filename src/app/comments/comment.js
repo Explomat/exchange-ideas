@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { List, Avatar, Input, Button } from 'antd';
+import { List, Avatar, Input, Button, Icon } from 'antd';
 
 class Comment extends Component {
 
@@ -11,22 +11,39 @@ class Comment extends Component {
 		this.handleSave = this.handleSave.bind(this);
 		this.handleRemove = this.handleRemove.bind(this);
 
+		this.handleToggleEditNew = this.handleToggleEditNew.bind(this);
+		this.handleChangeNew = this.handleChangeNew.bind(this);
+		this.handleSaveNew = this.handleSaveNew.bind(this);
+
+		this.handleLike = this.handleLike.bind(this);
+
 		this.state = {
 			isEdit: false,
-			editText: props.text
+			isNew: false,
+			editText: props.text,
+			newText: ''
 		}
 	}
 
-	handleRemove() {
+	handleRemove(e) {
+		e.preventDefault();
+
 		const { id, onRemove } = this.props;
 		onRemove(id);
 	}
 
-	handleSave() {
+	handleSave(e) {
 		const { id, onSave } = this.props;
 		onSave(id, this.state.editText);
 
-		this.handleToggleEdit();
+		this.handleToggleEdit(e);
+	}
+
+	handleSaveNew(e) {
+		const { ideaId, id, onNew } = this.props;
+		onNew(this.state.newText, ideaId, id);
+
+		this.handleToggleEditNew(e);
 	}
 
 	handleChange(e) {
@@ -35,33 +52,59 @@ class Comment extends Component {
 		});
 	}
 
-	handleToggleEdit() {
+	handleChangeNew(e) {
+		this.setState({
+			newText: e.target.value
+		});
+	}
+
+	handleToggleEdit(e) {
+		e.preventDefault();
+
 		this.setState({
 			isEdit: !this.state.isEdit
 		});
 	}
 
+	handleToggleEditNew(e) {
+		e.preventDefault();
+
+		this.setState({
+			isNew: !this.state.isNew
+		});
+	}
+
+	handleLike() {
+		const { id, onLike } = this.props;
+		onLike(id);
+	}
+
 	render() {
-		const { author_fullname, publish_date, text } = this.props;
-		const { isEdit, editText } = this.state;
+		const { author_fullname, publish_date, text, likes } = this.props;
+		const { isEdit, editText, isNew, newText } = this.state;
 
 		return (
-			<div>
-				<List.Item
-					actions={[
-						(!isEdit && <a key='list-edit' onClick={this.handleToggleEdit}>edit</a>),
-						(!isEdit && <a key='list-remove' onClick={this.handleRemove}>remove</a>)
-					]}
-				>
-					<List.Item.Meta
-						avatar={
-							<Avatar src="https://zos.alipayobjects.com/rmsportal/ODTLcjxAfvqbxHnVXCYX.png" />
-						}
-						title={<span>{author_fullname} {publish_date}</span>}
-						description={isEdit ? <Input.TextArea value={editText} onChange={this.handleChange}/> : text}
-					/>
-				</List.Item>
+			<div className='comment'>
+				<div>
+					<span>{author_fullname} {publish_date}</span>
+					<span style={{ marginLeft: '20px' }}>
+						{!isEdit && <Icon type='delete' style={{ padding: '10px' }} onClick={this.handleRemove}/>}
+						{!isEdit && <Icon type='edit'  style={{ padding: '10px' }} onClick={this.handleToggleEdit}/>}
+					</span>
+				</div>
+				<div>{isEdit ? <Input.TextArea value={editText} onChange={this.handleChange}/> : text}</div>
 				{isEdit && <Button type='primary' onClick={this.handleSave}>Save</Button>}
+				{!isEdit && <a onClick={this.handleToggleEditNew}>Ответить</a>}
+				{isNew && 
+					(<div>
+						<Input.TextArea value={newText} onChange={this.handleChangeNew}/>
+						<Button type='primary' onClick={this.handleSaveNew}>Save</Button>
+					</div>)
+				}
+				<span className='comment__like'>
+					<Icon type='like' style={{ marginRight: 8 }} onClick={this.handleLike}/>
+					{likes}
+				</span>
 			</div>
 		);
 	}

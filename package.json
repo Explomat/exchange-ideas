@@ -2,6 +2,7 @@
   "name": "exchange-ideas",
   "version": "0.1.0",
   "private": true,
+  "homepage": "/vsk/portal/exchange-ideas",
   "dependencies": {
     "@babel/core": "7.8.4",
     "@svgr/webpack": "4.3.3",

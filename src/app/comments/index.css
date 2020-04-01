@@ -1,0 +1,13 @@
+.ant-tree li .ant-tree-node-content-wrapper {
+	height: auto !important;
+}
+
+.comment {
+	position: relative;
+}
+
+.comment__like {
+	position: absolute;
+	right: 0;
+	padding: 0px 10px;
+}
