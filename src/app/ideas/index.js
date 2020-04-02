@@ -2,9 +2,10 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
 import { List, Avatar, Icon, Card, Input, Button } from 'antd';
+import Rate from '../components/rate';
 import { Link } from 'react-router-dom';
 
-import { getIdeas, removeIdea, newIdea } from './ideasActions';
+import { getIdeas, removeIdea, newIdea, rateIdea } from './ideasActions';
 //import './index.css';
 
 const IconText = ({ type, text, ...props }) => (
@@ -59,7 +60,7 @@ class Ideas extends Component {
 	}
 
 	render() {
-		const { ideas, match, removeIdea } = this.props;
+		const { ideas, match, removeIdea, rateIdea } = this.props;
 		const { addTextTitle, addTextDescription } = this.state;
 
 		return (
@@ -78,9 +79,9 @@ class Ideas extends Component {
 							<List.Item
 								key={item.title}
 								actions={[
-									<IconText type='star-o' text={item.rate} key='list-vertical-star-o' />,
+									<Rate text={parseInt(item.rate, 10)} disabled={item.meta.isRated} onChange={val => rateIdea(item.id, val)}/>,
 									<IconText type='message' text={item.comments_count} key='list-vertical-message' />,
-									<IconText type='delete' key='list-vertical-remove-o' onClick={(() => removeIdea(item.id))}/>
+									item.meta.canDelete && <IconText type='delete' key='list-vertical-remove-o' onClick={(() => removeIdea(item.id))}/>
 								]}
 							>
 								<List.Item.Meta
@@ -111,4 +112,4 @@ function mapStateToProps(state){
 	}
 }
 
-export default withRouter(connect(mapStateToProps, { getIdeas, removeIdea, newIdea })(Ideas));
+export default withRouter(connect(mapStateToProps, { getIdeas, removeIdea, newIdea, rateIdea })(Ideas));

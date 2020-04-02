@@ -72,6 +72,30 @@ export function newIdea(title, description, topic_id){
 	}
 };
 
+export function rateIdea(id, value){
+	return dispatch => {
+		request('IdeasRate')
+			.post({
+				id,
+				value
+			})
+			.then(r => r.json())
+			.then(d => {
+				if (d.type === 'error'){
+					throw d;
+				}
+				dispatch({
+					type: constants.IDEAS_EDIT_SUCCESS,
+					payload: d.data
+				});
+			})
+			.catch(e => {
+				console.error(e);
+				dispatch(error(e.message));
+			});
+	}
+};
+
 export function saveIdea(id){
 	return (dispatch, getState) => {
 		const st = getState();

@@ -1,4 +1,27 @@
+function _setComputedFields(obj, user_id) {
+	var l = ArrayOptFirstElem(XQuery("sql: \n\
+		select id \n\
+		from cc_exchange_ideas_ratings \n\
+		where \n\
+			object_type = 'cc_exchange_ideas_topic' \n\
+			and object_id = " + obj.id + " \n\
+			and user_id = " + user_id + " \n\
+	"));
+
+	obj.meta = {
+		isRated: (l != undefined),
+		canEdit: (Int(obj.author_id) == Int(user_id)),
+		canDelete: (Int(obj.author_id) == Int(user_id))
+	}
+
+	//obj.isRated = (l != undefined) ? 1 : 0;
+	return obj;
+}
+
 function create(title, description, image_id, author_id, author_fullname) {
+	var Utils = OpenCodeLib('x-local://wt/web/vsk/portal/exchange-ideas/server/utils.js');
+	DropFormsCache('x-local://wt/web/vsk/portal/exchange-ideas/server/utils.js');
+
 	var topicDoc = tools.new_doc_by_name('cc_exchange_ideas_topic');
 	topicDoc.TopElem.title = title;
 	topicDoc.TopElem.description = description;
@@ -10,10 +33,13 @@ function create(title, description, image_id, author_id, author_fullname) {
 
 	topicDoc.BindToDb();
 	topicDoc.Save();
-	return topicDoc;
+	return _setComputedFields(Utils.toJSObject(topicDoc.TopElem), author_id);
 }
 
-function update(id, data) {
+function update(id, data, user_id) {
+	var Utils = OpenCodeLib('x-local://wt/web/vsk/portal/exchange-ideas/server/utils.js');
+	DropFormsCache('x-local://wt/web/vsk/portal/exchange-ideas/server/utils.js');
+
 	var topicDoc = null;
 
 	try {
@@ -32,7 +58,7 @@ function update(id, data) {
 	}
 
 	topicDoc.Save();
-	return topicDoc;
+	return _setComputedFields(Utils.toJSObject(topicDoc.TopElem), user_id);
 }
 
 function remove(id) {
@@ -55,19 +81,27 @@ function remove(id) {
 	DeleteDoc(UrlFromDocID(Int(id)));
 }
 
-function list(id) {
+function list(id, user_id) {
+	var Utils = OpenCodeLib('x-local://wt/web/vsk/portal/exchange-ideas/server/utils.js');
+	DropFormsCache('x-local://wt/web/vsk/portal/exchange-ideas/server/utils.js');
 
 	if (id == undefined) {
-		return XQuery("sql: \n\
+		var l = XQuery("sql: \n\
 			select \n\
 				cceit.*, \n\
 				(select count(id) from cc_exchange_ideas_ideas where topic_id = cceit.id) ideas_count \n\
 			from \n\
 				cc_exchange_ideas_topics cceit \n\
-		")
+		");
+
+		var larr = Utils.toJSArray(l);
+		for (el in larr) {
+			_setComputedFields(el, user_id);
+		}
+		return larr;
 	}
 
-	return ArrayOptFirstElem(
+	var el = ArrayOptFirstElem(
 		XQuery("sql: \n\
 		select \n\
 			cceit.* \n\
@@ -76,10 +110,11 @@ function list(id) {
 		where \n\
 			cceit.id = " + id)
 	);
+
+	return _setComputedFields(Utils.toJSObject(el), user_id);
 }
 
 function rate(id, user_id, value) {
-
 	var Utils = OpenCodeLib('x-local://wt/web/vsk/portal/exchange-ideas/server/utils.js');
 	DropFormsCache('x-local://wt/web/vsk/portal/exchange-ideas/server/utils.js');
 
@@ -89,7 +124,8 @@ function rate(id, user_id, value) {
 			from cc_exchange_ideas_ratings \n\
 			where \n\
 				object_type = 'cc_exchange_ideas_topic' \n\
-		"));
+				and object_id = " + id)
+		);
 	}
 
 	var l = ArrayOptFirstElem(XQuery("sql: \n\
@@ -117,7 +153,8 @@ function rate(id, user_id, value) {
 
 	var topicDoc = OpenDoc(UrlFromDocID(Int(id)));
 	var r = getRate();
+	alert(tools.object_to_text(r, 'json'));
 	topicDoc.TopElem.rate = Utils.computeRate(Int(r.rate_sum), Int(r.rate_count));
 	topicDoc.Save();
-	return topicDoc;
+	return _setComputedFields(Utils.toJSObject(topicDoc.TopElem), user_id);
 }

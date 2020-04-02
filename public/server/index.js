@@ -1,7 +1,7 @@
 <%
 
-//curUserID = 6711785032659205612; // me test
-curUserID = 6719948502038810952; // volkov test
+curUserID = 6711785032659205612; // me test
+//curUserID = 6719948502038810952; // volkov test
 
 var Topics = OpenCodeLib('x-local://wt/web/vsk/portal/exchange-ideas/server/topic.js');
 DropFormsCache('x-local://wt/web/vsk/portal/exchange-ideas/server/topic.js');
@@ -20,16 +20,12 @@ function get_Topics(queryObjects) {
 	var topics = [];
 
 	try {
-		topics = Topics.list(topicId);
+		topics = Topics.list(topicId, curUserID);
 	} catch(e) {
 		return Utils.setError(e);
 	}
-
-	if (topicId != undefined) {
-		return Utils.setSuccess(Utils.toJSObject(topics));
-	}
 	
-	return Utils.setSuccess(Utils.toJSArray(topics));
+	return Utils.setSuccess(topics);
 }
 
 function post_TopicsRate(queryObjects) {
@@ -39,7 +35,7 @@ function post_TopicsRate(queryObjects) {
 
 	if (topicId != undefined && value != undefined) {
 		var topic = Topics.rate(topicId, curUserID, value);
-		return Utils.setSuccess(Utils.toJSObject(topic.TopElem));
+		return Utils.setSuccess(topic);
 	}
 
 	return Utils.setError('Topic ID or value not defined');
@@ -66,7 +62,7 @@ function post_Topics(queryObjects) {
 			}
 
 			var topicDoc = Topics.create(title, description, resId, curUserID, userDoc.TopElem.fullname);
-			return Utils.setSuccess(Utils.toJSObject(topicDoc.TopElem));
+			return Utils.setSuccess(topicDoc);
 		} catch(e) {
 			return Utils.setError(e);
 		}
@@ -90,9 +86,9 @@ function post_Topics(queryObjects) {
 			title: title,
 			description: description,
 			image_id: resId
-		});
+		}, curUserID);
 		//alert('update topic: 2');
-		return Utils.setSuccess(Utils.toJSObject(topicDoc.TopElem));
+		return Utils.setSuccess(topicDoc);
 	} catch(e) {
 		return Utils.setError(e);
 	}
@@ -110,7 +106,6 @@ function delete_Topics(queryObjects) {
 			return Utils.setError(e);
 		}
 	}
-
 	return Utils.setError('Unknown parameters');
 }
 
@@ -121,16 +116,12 @@ function get_Ideas(queryObjects) {
 	var ideas = [];
 
 	try {
-		ideas = Ideas.list(ideaId, topicId);
+		ideas = Ideas.list(ideaId, topicId, curUserID);
 	} catch(e) {
 		return Utils.setError(e);
 	}
-
-	if (ideaId != undefined) {
-		return Utils.setSuccess(Utils.toJSObject(ideas));
-	}
 	
-	return Utils.setSuccess(Utils.toJSArray(ideas));
+	return Utils.setSuccess(ideas);
 }
 
 function post_IdeasRate(queryObjects) {
@@ -140,10 +131,10 @@ function post_IdeasRate(queryObjects) {
 
 	if (ideaId != undefined && value != undefined) {
 		var idea = Ideas.rate(ideaId, curUserID, value);
-		return Utils.setSuccess(Utils.toJSObject(comment.TopElem));
+		return Utils.setSuccess(idea);
 	}
 
-	return Utils.setError('Idea ID not defined');
+	return Utils.setError('Idea ID or value not defined');
 }
 
 
@@ -170,7 +161,7 @@ function post_Ideas(queryObjects) {
 
 			var topicDoc = OpenDoc(UrlFromDocID(Int(topicId)));
 			var ideaDoc = Ideas.create(title, description, resId, curUserID, userDoc.TopElem.fullname, topicId, topicDoc.TopElem.title);
-			return Utils.setSuccess(Utils.toJSObject(ideaDoc.TopElem));
+			return Utils.setSuccess(ideaDoc);
 		} catch(e) {
 			return Utils.setError(e);
 		}
@@ -194,9 +185,9 @@ function post_Ideas(queryObjects) {
 			title: title,
 			description: description,
 			image_id: resId
-		});
+		}, curUserID);
 		//alert('update: 2');
-		return Utils.setSuccess(Utils.toJSObject(ideaDoc.TopElem));
+		return Utils.setSuccess(ideaDoc);
 	} catch(e) {
 		return Utils.setError(e);
 	}
@@ -225,13 +216,10 @@ function get_Comments(queryObjects) {
 	var comments = [];
 
 	try {
-		comments = Comments.list(parentId, ideaId);
+		comments = Comments.list(parentId, ideaId, curUserID);
 	} catch(e) {
 		return Utils.setError(e);
 	}
-
-	comments = Utils.toJSArray(comments);
-	//var commentsTree = Utils.listToTree(comments, 'publish_date');
 	
 	return Utils.setSuccess({
 		comments: comments
@@ -245,7 +233,7 @@ function post_CommentsLike(queryObjects) {
 
 	if (commentId != undefined) {
 		var comment = Comments.like(commentId, curUserID);
-		return Utils.setSuccess(Utils.toJSObject(comment.TopElem));
+		return Utils.setSuccess(comment);
 	}
 
 	return Utils.setError('Comment ID not defined');
@@ -264,7 +252,7 @@ function post_Comments(queryObjects) {
 			var ideaId = data.GetOptProperty('idea_id');
 			var userDoc = OpenDoc(UrlFromDocID(curUserID));
 			var commentDoc = Comments.create(text, curUserID, userDoc.TopElem.fullname, parentId, ideaId);
-			return Utils.setSuccess(Utils.toJSObject(commentDoc.TopElem));
+			return Utils.setSuccess(commentDoc);
 		} catch(e) {
 			return Utils.setError(e);
 		}
@@ -281,8 +269,8 @@ function post_Comments(queryObjects) {
 			objUpdate.likes = likes;
 		}
 
-		var commentDoc = Comments.update(commentId, objUpdate);
-		return Utils.setSuccess(Utils.toJSObject(commentDoc.TopElem));
+		var commentDoc = Comments.update(commentId, objUpdate, curUserID);
+		return Utils.setSuccess(commentDoc);
 	} catch(e) {
 		return Utils.setError(e);
 	}

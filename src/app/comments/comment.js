@@ -80,7 +80,7 @@ class Comment extends Component {
 	}
 
 	render() {
-		const { author_fullname, publish_date, text, likes } = this.props;
+		const { author_fullname, publish_date, text, likes, meta } = this.props;
 		const { isEdit, editText, isNew, newText } = this.state;
 
 		return (
@@ -88,11 +88,11 @@ class Comment extends Component {
 				<div>
 					<span>{author_fullname} {publish_date}</span>
 					<span style={{ marginLeft: '20px' }}>
-						{!isEdit && <Icon type='delete' style={{ padding: '10px' }} onClick={this.handleRemove}/>}
-						{!isEdit && <Icon type='edit'  style={{ padding: '10px' }} onClick={this.handleToggleEdit}/>}
+						{!isEdit && meta.canEdit && <Icon type='delete' style={{ padding: '10px' }} onClick={this.handleRemove}/>}
+						{!isEdit && meta.canEdit && <Icon type='edit'  style={{ padding: '10px' }} onClick={this.handleToggleEdit}/>}
 					</span>
 				</div>
-				<div>{isEdit ? <Input.TextArea value={editText} onChange={this.handleChange}/> : text}</div>
+				<div>{isEdit && meta.canEdit ? <Input.TextArea value={editText} onChange={this.handleChange}/> : text}</div>
 				{isEdit && <Button type='primary' onClick={this.handleSave}>Save</Button>}
 				{!isEdit && <a onClick={this.handleToggleEditNew}>Ответить</a>}
 				{isNew && 
@@ -102,7 +102,7 @@ class Comment extends Component {
 					</div>)
 				}
 				<span className='comment__like'>
-					<Icon type='like' style={{ marginRight: 8 }} onClick={this.handleLike}/>
+					<Icon type='like' theme={meta.isLiked ? 'twoTone' : ''} twoToneColor={meta.isLiked ? '#23de21' : ''} style={{ marginRight: 8 }} onClick={this.handleLike}/>
 					{likes}
 				</span>
 			</div>

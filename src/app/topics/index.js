@@ -81,9 +81,9 @@ class Topics extends Component {
 							<List.Item
 								key={item.title}
 								actions={[
-									<Rate text={parseInt(item.rate, 10)} onChange={val => rateTopic(item.id, val)}/>,
+									<Rate text={parseInt(item.rate, 10)} disabled={item.meta.isRated} onChange={val => rateTopic(item.id, val)}/>,
 									<IconText type='alert' text={item.ideas_count} key='list-vertical-alert' />,
-									<IconText type='delete' key='list-vertical-remove-o' onClick={(() => removeTopic(item.id))}/>
+									item.meta.canDelete && <IconText type='delete' key='list-vertical-remove-o' onClick={(() => removeTopic(item.id))}/>
 								]}
 								extra={
 									<img

@@ -64,7 +64,7 @@ class Topic extends Component {
 			<Card
 				className='topic'
 				actions={[
-					(!isEdit && <a key='list-edit' onClick={this.handleToggleEdit}>edit</a>),
+					(!isEdit && (topic.meta && topic.meta.canEdit) && <a key='list-edit' onClick={this.handleToggleEdit}>edit</a>),
 					(isEdit && <a key='list-save' onClick={this.handleSave}>save</a>),
 				]}
 			>

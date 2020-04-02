@@ -56,14 +56,14 @@ class Idea extends Component {
 	}
 
 	render() {
-		const { idea } = this.props;
+		const { idea, meta } = this.props;
 		const { isEdit } = this.state;
 
 		return (
 			<Card
 				className='idea'
 				actions={[
-					(!isEdit && <a key='list-edit' onClick={this.handleToggleEdit}>edit</a>),
+					(!isEdit && (idea.meta && idea.meta.canEdit) && <a key='list-edit' onClick={this.handleToggleEdit}>edit</a>),
 					(isEdit && <a key='list-save' onClick={this.handleSave}>save</a>),
 				]}
 			>
