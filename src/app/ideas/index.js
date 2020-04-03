@@ -3,17 +3,12 @@ import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
 import { List, Avatar, Icon, Card, Input, Button } from 'antd';
 import Rate from '../components/rate';
+import IconText from '../components/iconText';
 import { Link } from 'react-router-dom';
 
 import { getIdeas, removeIdea, newIdea, rateIdea } from './ideasActions';
-//import './index.css';
+import './index.css';
 
-const IconText = ({ type, text, ...props }) => (
-	<span>
-		<Icon type={type} style={{ marginRight: 8 }} onClick={props.onClick}/>
-		{text}
-	</span>
-);
 
 class Ideas extends Component {
 
@@ -64,8 +59,29 @@ class Ideas extends Component {
 		const { addTextTitle, addTextDescription } = this.state;
 
 		return (
-			<Card className='ideas'>
-				<List
+			<div className='ideas'>
+				{ideas.map(item => {
+					return (
+						<div key={item.id} className='ideas__idea-list'>
+							<div className='ideas__idea-list_header'>
+								<Link to={`/topics/${match.params.id}/ideas/${item.id}`}>
+									<Icon type='alert' className='ideas__idea-list_body_icon'/>
+									<span>{item.title}</span>
+								</Link>
+								<span className='ideas__idea-list_body_pubish-date'>{item.publish_date}</span>
+							</div>
+							<div className='ideas__idea-list_footer'>
+								<Rate text={parseInt(item.rate, 10)} className='icon-text' disabled={item.meta.isRated} onChange={val => rateIdea(item.id, val)}/>
+								<IconText type='message' text={item.comments_count} className='icon-text'/>
+								{item.meta.canDelete && <IconText type='delete' className='ideas__idea-list_footer_delete' onClick={(() => removeIdea(item.id))}/>}
+								<span className='ideas__idea-list_footer-descr'>
+									<span>{item.author_fullname}</span>
+								</span>
+							</div>
+						</div>
+					);
+				})}
+				{/*<List
 					itemLayout='vertical'
 					pagination={{
 						onChange: page => {
@@ -86,22 +102,22 @@ class Ideas extends Component {
 							>
 								<List.Item.Meta
 									avatar={<Avatar src={item.image_id} />}
-									title={<Link to={`/topics/${match.params.id}/ideas/${item.id}`}>{item.title}</Link> /*<a href={`/topics/${item.id}`}>{item.title}</a>*/}
+									title={<Link to={`/topics/${match.params.id}/ideas/${item.id}`}>{item.title}</Link>}
 									description={item.description}
 								/>
 							</List.Item>
 						);
 					})}
 
-				</List>
+				</List>*/}
 
-				<div>
-					<h3>Добавить новую идею</h3>
-					<Input value={addTextTitle} placeholder='Название' onChange={this.handleChangeAddTitle}/>
-					<Input.TextArea value={addTextDescription} placeholder='Описание' onChange={this.handleChangeAddDescription}/>
+				<div className='ideas__new'>
+					<h4>Добавить новую идею</h4>
+					<Input className='ideas__new_title' value={addTextTitle} placeholder='Название' onChange={this.handleChangeAddTitle}/>
+					<Input.TextArea className='ideas__new_description' value={addTextDescription} placeholder='Описание' onChange={this.handleChangeAddDescription}/>
 					<Button type='primary' onClick={this.handleAdd}>Добавить</Button>
 				</div>
-			</Card>
+			</div>
 		);
 	}
 }

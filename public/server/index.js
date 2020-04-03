@@ -1,6 +1,6 @@
 <%
 
-curUserID = 6711785032659205612; // me test
+//curUserID = 6711785032659205612; // me test
 //curUserID = 6719948502038810952; // volkov test
 
 var Topics = OpenCodeLib('x-local://wt/web/vsk/portal/exchange-ideas/server/topic.js');

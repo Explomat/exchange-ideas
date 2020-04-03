@@ -27,14 +27,14 @@ class MyRate extends Component {
 	}*/
 
 	render() {
-		const { text, disabled } = this.props;
+		const { text, disabled, className } = this.props;
 		//const { isShowRate } = this.state;
 
 		return (
-			<div className='rate'>
+			<span className='rate'>
 				{disabled ? (
-					<span>
-						<Icon type='star' theme={disabled ? 'twoTone' : ''} twoToneColor={disabled ? '#ffd712' : ''} style={{ marginRight: 8 }} onClick={this.handleToggle}/>
+					<span className={className}>
+						<Icon type='star' theme={disabled ? 'twoTone' : ''} twoToneColor={disabled ? '#ffd712' : ''} style={{ marginRight: 4 }} onClick={this.handleToggle}/>
 						{text}
 					</span>
 				): (
@@ -42,14 +42,14 @@ class MyRate extends Component {
 					placement='leftTop'
 					content={<Rate value={text} onChange={this.handleChange} />}
 				>
-					<span>
-						<Icon type='star' theme={disabled ? 'twoTone' : ''} twoToneColor={disabled ? '#ffd712' : ''} style={{ marginRight: 8 }} onClick={this.handleToggle}/>
+					<span className={className}>
+						<Icon type='star' theme={disabled ? 'twoTone' : ''} twoToneColor={disabled ? '#ffd712' : ''} style={{ marginRight: 4 }} onClick={this.handleToggle}/>
 						{text}
 					</span>
 				</Popover>
 				)}
 				
-			</div>
+			</span>
 		);
 	}
 }

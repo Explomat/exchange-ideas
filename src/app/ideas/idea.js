@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { Avatar, Icon, Card, Input } from 'antd';
+import { Avatar, Icon, Card, Input, Button } from 'antd';
 import Comments from '../comments';
 import { getIdea, onChange, saveIdea } from './ideasActions';
 import './index.css';
@@ -59,7 +59,7 @@ class Idea extends Component {
 		const { idea, meta } = this.props;
 		const { isEdit } = this.state;
 
-		return (
+		/*return (
 			<Card
 				className='idea'
 				actions={[
@@ -74,6 +74,25 @@ class Idea extends Component {
 
 				<h3>Комментарии</h3>
 				<Comments />
+			</Card>
+		);*/
+		return (
+			<Card className='idea'>
+				<div className='idea__header'>
+					<span className='idea__header_author-fullname'>
+						{idea.author_fullname}
+					</span>
+					<span className='idea__header_publish-date'>{idea.publish_date}</span>
+					{!isEdit && (idea.meta && idea.meta.canEdit) && <Icon type='edit' className='idea__header_edit-icon' onClick={this.handleToggleEdit} />}
+					{isEdit && <Button type='primary' size='small' className='idea__header_save-button' onClick={this.handleSave}>Сохранить</Button>}
+				</div>
+				<div className='idea__body'>
+					{isEdit ? <Input value={idea.title} onChange={this.handleChangeTitle} /> : <h2 className='idea__body_title'>{idea.title}</h2>}
+					{isEdit ? <Input.TextArea value={idea.description} onChange={this.handleChangeDescription} /> : <div className='idea__body_description'>{idea.description}</div>}
+				</div>
+				<div className='idea__footer'>
+					<Comments/>
+				</div>
 			</Card>
 		);
 	}

@@ -2,20 +2,10 @@ import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { List, Avatar, Icon, Card, Input, Button } from 'antd';
 import Rate from '../components/rate';
+import IconText from '../components/iconText';
 import { Link } from 'react-router-dom';
-//import { MessageOutlined, StarOutlined } from '@ant-design/icons';
-
-//import { StarOutlined, StarFilled, StarTwoTone } from '@ant-design/icons';
-
 import { getTopics, removeTopic, newTopic, rateTopic } from './topicsActions';
 import './index.css';
-
-const IconText = ({ type, text, ...props }) => (
-	<span>
-		<Icon type={type} style={{ marginRight: 8 }} onClick={props.onClick}/>
-		{text}
-	</span>
-);
 
 class Topics extends Component {
 
@@ -78,7 +68,24 @@ class Topics extends Component {
 				>
 					{topics.map(item => {
 						return (
-							<List.Item
+							<div key={item.id} className='topics__topic-list'>
+								<div className='topics__topic-list_header'>
+									<Link to={`/topics/${item.id}`}>
+										<Icon type='project' className='topics__topic-list_body_icon'/>
+										<span>{item.title}</span>
+									</Link>
+									<span className='topics__topic-list_body_pubish-date'>{item.publish_date}</span>
+								</div>
+								<div className='topics__topic-list_footer'>
+									<Rate text={parseInt(item.rate, 10)} className='icon-text' disabled={item.meta.isRated} onChange={val => rateTopic(item.id, val)}/>
+									<IconText type='alert' text={item.ideas_count} className='icon-text'/>
+									{item.meta.canDelete && <IconText type='delete' className='topics__topic-list_footer_delete' onClick={(() => removeTopic(item.id))}/>}
+									<span className='topics__topic-list_footer-descr'>
+										<span>{item.author_fullname}</span>
+									</span>
+								</div>
+							</div>
+							/*<List.Item
 								key={item.title}
 								actions={[
 									<Rate text={parseInt(item.rate, 10)} disabled={item.meta.isRated} onChange={val => rateTopic(item.id, val)}/>,
@@ -95,19 +102,19 @@ class Topics extends Component {
 							>
 								<List.Item.Meta
 									avatar={<Avatar src={item.image_id} />}
-									title={<Link to={`/topics/${item.id}`}>{item.title}</Link> /*<a href={`/topics/${item.id}`}>{item.title}</a>*/}
+									title={<Link to={`/topics/${item.id}`}>{item.title}</Link>}
 									description={item.description}
 								/>
-							</List.Item>
+							</List.Item>*/
 						);
 					})}
 
 				</List>
 
-				<div>
-					<h3>Добавить новую тему</h3>
-					<Input value={addTextTitle} placeholder='Название' onChange={this.handleChangeAddTitle}/>
-					<Input.TextArea value={addTextDescription} placeholder='Описание' onChange={this.handleChangeAddDescription}/>
+				<div className='topics__new'>
+					<h4>Добавить новую тему</h4>
+					<Input className='topics__new_title' value={addTextTitle} placeholder='Название' onChange={this.handleChangeAddTitle}/>
+					<Input.TextArea className='topics__new_description' value={addTextDescription} placeholder='Описание' onChange={this.handleChangeAddDescription}/>
 					<Button type='primary' onClick={this.handleAdd}>Добавить</Button>
 				</div>
 			</Card>

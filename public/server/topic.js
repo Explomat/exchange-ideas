@@ -8,6 +8,8 @@ function _setComputedFields(obj, user_id) {
 			and user_id = " + user_id + " \n\
 	"));
 
+	obj.publish_date = StrXmlDate(DateNewTime(Date(obj.publish_date)));
+
 	obj.meta = {
 		isRated: (l != undefined),
 		canEdit: (Int(obj.author_id) == Int(user_id)),

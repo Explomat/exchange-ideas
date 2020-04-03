@@ -11,3 +11,15 @@
 	right: 0;
 	padding: 0px 10px;
 }
+
+.comments__new {
+	margin-top: 20px;
+}
+
+.comments__new_text {
+	margin-bottom: 4px !important;
+}
+
+.ant-tree-node-content-wrapper {
+	border-bottom: 1px dashed #00000070;
+}
