@@ -1,10 +1,9 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { withRouter } from 'react-router';
-import { List, Avatar, Icon, Card, Tree, Input, Button } from 'antd';
+import { Tree, Input, Button } from 'antd';
+//import { HashLink } from 'react-router-hash-link';
 import Comment from './comment';
-import IconText from '../components/iconText';
-import { Link } from 'react-router-dom';
 
 import { getComments, removeComment, saveComment, newComment, likeComment } from './commentsActions';
 import './index.css';
@@ -109,7 +108,7 @@ class Comments extends Component {
 	}
 
 	renderTree(data) {
-		const { match, comments, removeComment, saveComment, newComment, likeComment } = this.props;
+		const { match, removeComment, saveComment, newComment, likeComment } = this.props;
 
 		return data.map(item => {
 			if (item.children.length > 0) {
@@ -153,8 +152,10 @@ class Comments extends Component {
 
 		return (
 			<div className='comments'>
-				<h3>Комментарии {commentsLength}</h3>
+				<h4 className='comments__list-title'>Комментарии {commentsLength}</h4>
+				{/*<HashLink to="/comments" />*/}
 				<Tree
+					defaultExpandAll={true}
 					selectable={false}
 				>
 					{this.renderTree(comments)}
@@ -162,7 +163,7 @@ class Comments extends Component {
 				<div className='comments__new'>
 					<h4>Добавить комментарий</h4>
 					<Input.TextArea className='comments__new_text' value={addText} autoSize={false} onChange={this.handleChangeAdd}/>
-					<Button type='primary' onClick={this.handleAdd}>Добавить</Button>
+					<Button type='primary' disabled={addText.trim() === ''} onClick={this.handleAdd}>Добавить</Button>
 				</div>
 			</div>
 		);

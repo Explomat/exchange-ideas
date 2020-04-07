@@ -18,9 +18,7 @@ export const constants = {
 export function onChange(data) {
 	return {
 		type: constants.IDEAS_CHANGE,
-		payload: {
-			data
-		}
+		payload: data
 	}
 }
 
@@ -86,6 +84,10 @@ export function rateIdea(id, value){
 				}
 				dispatch({
 					type: constants.IDEAS_EDIT_SUCCESS,
+					payload: d.data
+				});
+				dispatch({
+					type: constants.IDEAS_CHANGE,
 					payload: d.data
 				});
 			})

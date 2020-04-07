@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import { Upload, Button, Icon, message } from 'antd';
-import { createBaseUrl } from '../../utils/request';
-import reqwest from 'reqwest';
+import { createBaseUrl } from '../../../utils/request';
 import './index.css';
 
 class UploadFile extends Component {
@@ -16,12 +15,12 @@ class UploadFile extends Component {
 
 	render() {
 		const { fileList } = this.state;
-		const { url, data, onFileUploaded, disabled } = this.props;
+		const { url, data, accept, onSuccess, onRemove } = this.props;
 
 		return (
 			<div className='upload-file'>
 				<Upload
-					accept='.xls, .xlsx, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+					accept={accept}
 					name='file'
 					fileList={fileList}
 					action={url}
@@ -39,19 +38,24 @@ class UploadFile extends Component {
 					}
 					onSuccess={
 						d => {
-							onFileUploaded(d.data);
+							if (onSuccess) {
+								onSuccess(d.data);
+							}
 						}
 					}
 					onRemove = {() => {
 						this.setState({
 							fileList: []
 						});
-						this.props.onRemove();
+
+						if (onRemove) {
+							onRemove();
+						}
 					}}
 				>
-					{disabled && <Button className='learnings-upload-file'>
+					<Button className='learnings-upload-file'>
 						<Icon type='upload' /> Загрузить файл
-					</Button>}
+					</Button>
 				</Upload>
 			</div>
 		);

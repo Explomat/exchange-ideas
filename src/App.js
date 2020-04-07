@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 //import { withRouter } from 'react-router';
 import { connect } from 'react-redux';
-import { error, info } from './appActions';
+//import { error, info } from './appActions';
 import { Route, Redirect } from 'react-router-dom';
 import Topics from './app/topics';
 import Topic from './app/topics/topic';
@@ -15,7 +15,8 @@ class App extends Component {
 		return (
 			<div className='adaptation'>
 				{ui.isLoading && <div>Загрузка данных</div>}
-				{!!ui.error && <div>error</div>}
+				{!!ui.error && <div>{ui.error}</div>}
+				{!!ui.info && <div>{ui.info}</div>}
 				<Route exact path='/' render={() => <Redirect to='/topics' />} />
 				<Route exact path='/topics' component={Topics}/>
 				<Route exact path='/topics/:id' component={Topic}/>
@@ -31,4 +32,4 @@ function mapStateToProps(state){
 	}
 }
 
-export default connect(mapStateToProps, { error })(App);
+export default connect(mapStateToProps)(App);

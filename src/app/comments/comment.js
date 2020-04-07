@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { List, Avatar, Input, Button, Icon } from 'antd';
+import { Input, Button, Icon, Tooltip } from 'antd';
 
 class Comment extends Component {
 
@@ -80,25 +80,35 @@ class Comment extends Component {
 	}
 
 	render() {
-		const { author_fullname, publish_date, text, likes, meta } = this.props;
+		const { pict_url, author_id, author_fullname, publish_date, text, likes, meta } = this.props;
 		const { isEdit, editText, isNew, newText } = this.state;
 
 		return (
 			<div className='comment'>
-				<div>
-					<span>{author_fullname} {publish_date}</span>
-					<span style={{ marginLeft: '20px' }}>
-						{!isEdit && meta.canEdit && <Icon type='delete' style={{ padding: '10px' }} onClick={this.handleRemove}/>}
-						{!isEdit && meta.canEdit && <Icon type='edit'  style={{ padding: '10px' }} onClick={this.handleToggleEdit}/>}
+				<div className='comment__header'>
+					{pict_url ? (
+						<span className='ant-avatar ant-avatar-circle ant-avatar-image'>
+							<img src={pict_url}/>
+						</span>
+					) : (
+						<Icon className='comment__avatar' type='user' />
+					)}
+					<span>
+						<a href={'/view_doc.html?mode=collaborator&object_id=' + author_id}>{author_fullname}</a>
+						<span className='comment__publish-date'>{new Date(publish_date).toLocaleDateString()}</span>
+					</span>
+					<span className='comment__header_crud'>
+						{!isEdit && meta.canEdit && <Tooltip title='Удалить'><Icon type='delete' style={{ padding: '10px' }} onClick={this.handleRemove}/></Tooltip>}
+						{!isEdit && meta.canEdit && <Tooltip title='Редактировать'><Icon type='edit'  style={{ padding: '10px' }} onClick={this.handleToggleEdit}/></Tooltip>}
 					</span>
 				</div>
 				<div>{isEdit && meta.canEdit ? <Input.TextArea value={editText} onChange={this.handleChange}/> : text}</div>
-				{isEdit && <Button type='primary' onClick={this.handleSave}>Save</Button>}
+				{isEdit && <Button type='primary' onClick={this.handleSave}>Сохранить</Button>}
 				{!isEdit && <a onClick={this.handleToggleEditNew}>Ответить</a>}
 				{isNew && 
 					(<div>
 						<Input.TextArea value={newText} onChange={this.handleChangeNew}/>
-						<Button type='primary' onClick={this.handleSaveNew}>Save</Button>
+						<Button type='primary' onClick={this.handleSaveNew}>Сохранить</Button>
 					</div>)
 				}
 				<span className='comment__like'>

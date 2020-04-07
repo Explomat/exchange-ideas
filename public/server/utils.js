@@ -100,17 +100,22 @@ function listToTree(list, sortFieldName) {
 	return sortTree(roots, sortFieldName);
 }
 
-function createResourseWithImage(userId, userFullname, fileName, fileType, imageBinary) {
+function createResourseWithImage(userId, userFullname, fileName, imageBinary) {
+	fileName = String(fileName);
+	var fileTypeIndex = fileName.indexOf('.');
+	var fileType = fileName.substr(fileTypeIndex, fileName.length);
+
 	var docResource = tools.new_doc_by_name('resource'); 
+	docResource.TopElem.code = 'exchange-ideas';
 	docResource.TopElem.person_id = userId; 
 	docResource.TopElem.allow_unauthorized_download = true;
-	docResource.TopElem.allow_download = true; 
+	docResource.TopElem.allow_download = true;
 	docResource.TopElem.file_name = fileName;
 	docResource.TopElem.name = fileName;
 	docResource.TopElem.type = fileType;
 	docResource.TopElem.person_fullname = userFullname;
 	docResource.BindToDb();
-	docResource.TopElem.put_str(file, fileName); 
+	docResource.TopElem.put_str(imageBinary, fileName); 
 	docResource.Save();
 
 	return docResource;

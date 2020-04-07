@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { Avatar, Icon, Card, Input, Button } from 'antd';
+import { PageHeader, Icon, Card, Input, Button, Tooltip } from 'antd';
+import Rate from '../components/rate';
 import Comments from '../comments';
-import { getIdea, onChange, saveIdea } from './ideasActions';
+import { getIdea, onChange, saveIdea, rateIdea } from './ideasActions';
 import './index.css';
 
 
@@ -56,7 +57,7 @@ class Idea extends Component {
 	}
 
 	render() {
-		const { idea, meta } = this.props;
+		const { history, idea, rateIdea } = this.props;
 		const { isEdit } = this.state;
 
 		/*return (
@@ -78,17 +79,40 @@ class Idea extends Component {
 		);*/
 		return (
 			<Card className='idea'>
-				<div className='idea__header'>
+				{/*<div className='idea__header'>
 					<span className='idea__header_author-fullname'>
 						{idea.author_fullname}
 					</span>
 					<span className='idea__header_publish-date'>{idea.publish_date}</span>
 					{!isEdit && (idea.meta && idea.meta.canEdit) && <Icon type='edit' className='idea__header_edit-icon' onClick={this.handleToggleEdit} />}
 					{isEdit && <Button type='primary' size='small' className='idea__header_save-button' onClick={this.handleSave}>Сохранить</Button>}
-				</div>
+				</div>*/}
 				<div className='idea__body'>
-					{isEdit ? <Input value={idea.title} onChange={this.handleChangeTitle} /> : <h2 className='idea__body_title'>{idea.title}</h2>}
+					{isEdit ?
+						<Input value={idea.title} onChange={this.handleChangeTitle} /> :
+						(
+							<PageHeader
+								onBack={history.goBack}
+								title={<h3 className='idea__body_title'>{idea.title}</h3>}
+								subTitle={
+									<span>
+										<span className='idea__header_author-fullname'>
+											{idea.author_fullname}
+										</span>
+										<span className='idea__header_publish-date'>{new Date(idea.publish_date).toLocaleDateString()}</span>
+									</span>
+								}
+								extra={[
+									(!isEdit && (idea.meta && idea.meta.canEdit) &&
+										<Tooltip key='edit' title='Редактировать'>
+											<Icon type='edit' onClick={this.handleToggleEdit} />
+										</Tooltip>),
+									<Rate key='rate' text={parseInt(idea.rate, 10)} className='icon-text' disabled={idea.meta && idea.meta.isRated} onChange={val => rateIdea(idea.id, val)}/>
+								]}
+							/>
+					)}
 					{isEdit ? <Input.TextArea value={idea.description} onChange={this.handleChangeDescription} /> : <div className='idea__body_description'>{idea.description}</div>}
+					{isEdit && <Button type='primary' size='small' className='idea__header_save-button' onClick={this.handleSave}>Сохранить</Button>}
 				</div>
 				<div className='idea__footer'>
 					<Comments/>
@@ -104,4 +128,4 @@ function mapStateToProps(state){
 	}
 }
 
-export default connect(mapStateToProps, { getIdea, onChange, saveIdea })(Idea);
+export default connect(mapStateToProps, { getIdea, onChange, saveIdea, rateIdea })(Idea);

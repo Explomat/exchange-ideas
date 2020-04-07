@@ -80,7 +80,17 @@ function remove(id) {
 		} catch(e) {}
 	}
 
+	var topicDoc = OpenDoc(UrlFromDocID(Int(id)));
+	alert('111111111111111111111111');
+	var resId = topicDoc.TopElem.image_id;
+	alert('222222222222222222222222222222');
+	if (resId != null && resId != undefined) {
+		alert('3333333333333333333333333333');
+		DeleteDoc(UrlFromDocID(Int(resId)));
+		alert('44444444444444444444444444444');
+	}
 	DeleteDoc(UrlFromDocID(Int(id)));
+	alert('55555555555555555555555555555');
 }
 
 function list(id, user_id) {

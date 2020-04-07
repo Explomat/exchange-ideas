@@ -35,6 +35,13 @@ const request = (action_name, urlParams = {}) => {
 				...config
 			});
 		},
+		form: (data = {}, config) => {
+			return fetch(_url, {
+				method: 'POST',
+				body: data,
+				...config
+			});
+		},
 		delete: (data = {}, config) => {
 			return fetch(_url, {
 				method: 'DELETE',

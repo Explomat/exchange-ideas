@@ -78,7 +78,12 @@ function remove(id) {
 			Comments.remove(elc.id);
 		} catch(e) {}
 	}
-	
+
+	var ideaDoc = OpenDoc(UrlFromDocID(Int(id)));
+	var resId = ideaDoc.TopElem.image_id;
+	if (resId != null && resId != undefined) {
+		DeleteDoc(UrlFromDocID(resId));
+	}
 	DeleteDoc(UrlFromDocID(Int(id)));
 }
 

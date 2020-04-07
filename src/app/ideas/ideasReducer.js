@@ -56,13 +56,11 @@ const ideasReducer = (state = {
 		}
 
 		case constants.IDEAS_CHANGE: {
-			const { data } = action.payload;
-
 			return {
 				...state,
 				currentIdea: {
 					...state.currentIdea,
-					...data
+					...action.payload
 				}
 			}
 		}

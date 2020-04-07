@@ -44,24 +44,37 @@ function post_TopicsRate(queryObjects) {
 function post_Topics(queryObjects) {
 	var topicId = queryObjects.GetOptProperty('id');
 
-	//var data = queryObjects.Request.Form;
-	var data = tools.read_object(queryObjects.Body);
+	var data = queryObjects.Request.Form;
+	alert(tools.object_to_text(data, 'json'));
+	//var data = tools.read_object(queryObjects.Body);
 	var title = data.GetOptProperty('title');
-	var description = data.GetOptProperty('description');
-	var file = data.GetOptProperty('file');
+	var description = data.GetOptProperty('description'); //data.GetOptProperty('description');
+	var file = data.GetOptProperty('file'); //data.GetOptProperty('file');
 	var resId = null;
+
+	if (title == undefined || description == undefined) {
+		return Utils.setError('Unknown arguments');
+	}
 
 	// create new
 	if (topicId == undefined) {
+		alert(1);
+		alert('title:' + title);
+		alert('description:' + description);
 		try {
 			var userDoc = OpenDoc(UrlFromDocID(curUserID));
+			alert(2);
 
 			if (file != undefined) {
-				var resDoc = Utils.createResourseWithImage(curUserID, String(userDoc.TopElem.fullname), file.fileName, file.fileType, file);
+				alert(3);
+				var resDoc = Utils.createResourseWithImage(curUserID, String(userDoc.TopElem.fullname), file.FileName, file);
 				resId = resDoc.DocID;
 			}
 
+			alert(4);
+
 			var topicDoc = Topics.create(title, description, resId, curUserID, userDoc.TopElem.fullname);
+			alert(5);
 			return Utils.setSuccess(topicDoc);
 		} catch(e) {
 			return Utils.setError(e);
@@ -155,7 +168,7 @@ function post_Ideas(queryObjects) {
 			var userDoc = OpenDoc(UrlFromDocID(curUserID));
 
 			if (file != undefined) {
-				var resDoc = Utils.createResourseWithImage(curUserID, String(userDoc.TopElem.fullname), file.fileName, file.fileType, file);
+				var resDoc = Utils.createResourseWithImage(curUserID, String(userDoc.TopElem.fullname), file.FileName, file.fileType, file);
 				resId = resDoc.DocID;
 			}
 

@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { Avatar, Icon, Card, Input, Button } from 'antd';
+import { PageHeader, Icon, Card, Input, Button, Tooltip } from 'antd';
 import Ideas from '../ideas';
 import { getTopic, saveTopic, onChange } from './topicsActions';
 import './index.css';
@@ -57,7 +57,7 @@ class Topic extends Component {
 
 
 	render() {
-		const { topic } = this.props;
+		const { topic, history } = this.props;
 		const { isEdit } = this.state;
 
 		/*return (
@@ -81,16 +81,35 @@ class Topic extends Component {
 		return (
 			<Card className='topic'>
 				<div className='topic__header'>
-					<span className='topic__header_author-fullname'>
+					{/*<span className='topic__header_author-fullname'>
 						{topic.author_fullname}
 					</span>
 					<span className='topic__header_publish-date'>{topic.publish_date}</span>
 					{!isEdit && (topic.meta && topic.meta.canEdit) && <Icon type='edit' className='topic__header_edit-icon' onClick={this.handleToggleEdit} />}
-					{isEdit && <Button type='primary' size='small' className='topic__header_save-button' onClick={this.handleSave}>Сохранить</Button>}
+					{isEdit && <Button type='primary' size='small' className='topic__header_save-button' onClick={this.handleSave}>Сохранить</Button>}*/}
 				</div>
 				<div className='topic__body'>
-					{isEdit ? <Input value={topic.title} onChange={this.handleChangeTitle} /> : <h2 className='topic__body_title'>{topic.title}</h2>}
+					{isEdit ?
+						<Input value={topic.title} onChange={this.handleChangeTitle} /> :
+						(
+							<PageHeader
+								onBack={history.goBack}
+								title={<h3 className='topic__body_title'>{topic.title}</h3>}
+								subTitle={
+									<span>
+										<span className='topic__header_author-fullname'>
+											{topic.author_fullname}
+										</span>
+										{/*<span className='topic__header_publish-date'>{topic.publish_date}</span>*/}
+									</span>
+								}
+								extra={
+									(!isEdit && (topic.meta && topic.meta.canEdit) && <Tooltip title='Реактировать'><Icon type='edit' onClick={this.handleToggleEdit} /></Tooltip>)
+								}
+							/>
+					)}
 					{isEdit ? <Input.TextArea value={topic.description} onChange={this.handleChangeDescription} /> : <div className='topic__body_description'>{topic.description}</div>}
+					{isEdit && <Button key='save-edit' type='primary' size='small' className='topic__header_save-button' onClick={this.handleSave}>Сохранить</Button>}
 				</div>
 				<div className='topic__footer'>
 					<Ideas/>

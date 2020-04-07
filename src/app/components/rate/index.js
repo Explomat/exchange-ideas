@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { Popover, Rate, Icon } from 'antd';
-//import './index.css';
+import './index.css';
 
 class MyRate extends Component {
 
@@ -40,7 +40,12 @@ class MyRate extends Component {
 				): (
 					<Popover
 					placement='leftTop'
-					content={<Rate value={text} onChange={this.handleChange} />}
+					content={
+						<span>
+							<div>Оценить</div>
+							<Rate value={text} onChange={this.handleChange} />
+						</span>
+					}
 				>
 					<span className={className}>
 						<Icon type='star' theme={disabled ? 'twoTone' : ''} twoToneColor={disabled ? '#ffd712' : ''} style={{ marginRight: 4 }} onClick={this.handleToggle}/>

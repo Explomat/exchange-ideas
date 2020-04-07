@@ -3,12 +3,12 @@
 	color: #444444b3;
 }
 
-.topic__header_author-fullname {
-	margin-right: 12px;
+.topics__topic-list_image {
+	width: 100%;
 }
 
-.topic__header_edit-icon {
-	float: right;
+.topic__header_author-fullname {
+	margin-right: 12px;
 }
 
 .topic__header_save-button {
@@ -16,7 +16,7 @@
 }
 
 .topic__body {
-	margin: 10px 0 20px 0;
+	margin: 0px 0 30px 0;
 }
 
 .topic__body_description {
@@ -66,4 +66,8 @@
 
 .topics__topic-list_header {
 	margin-bottom: 8px;
+}
+
+.topics__topic-list_body {
+	margin: 10px 0;
 }
