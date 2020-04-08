@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { List, Icon, Card, Input, Button, Tooltip } from 'antd';
+import { Icon, Card, Input, Button, Tooltip, Skeleton } from 'antd';
 //import Rate from '../components/rate';
 import IconText from '../components/iconText';
 import UploadButton from  '../components/uploadButton';
@@ -63,40 +63,22 @@ class Topics extends Component {
 		});
 	}
 
-	/*handleAdd() {
-		const { addTextTitle, addTextDescription } = this.state;
-		const { newTopic} = this.props;
-
-		newTopic(addTextTitle, addTextDescription);
-
-		this.setState({
-			addTextTitle: '',
-			addTextDescription: ''
-		});
-	}*/
-
 	render() {
 		const { topics, removeTopic } = this.props;
 		const { addTextTitle, addTextDescription } = this.state;
 
 		return (
-			<Card className='topics'>
-				<List
-					itemLayout='vertical'
-					size='large'
-					pagination={{
-						onChange: page => {
-							console.log(page);
-						},
-						pageSize: 3
-					}}
-				>
+			<Card>
+				<div className='topics'>
 					{topics.map(item => {
 						const descr = item.description.length > 200 ? item.description.substring(0, 200) + '...' : item.description;
 
 						return (
 							<div key={item.id} className='topics__topic-list'>
-								{item.image_id && <img className='topics__topic-list_image' src={`/download_file.html?file_id=${item.image_id}`} />}
+								{item.image_id ?
+									<img className='topics__topic-list_image' src={`/download_file.html?file_id=${item.image_id}`} />
+									: <Skeleton className='topics__topic-list_image'/>
+								}
 								<div className='topics__topic-list_header'>
 									<Link to={`/topics/${item.id}`}>
 										<Icon type='project' className='topics__topic-list_body_icon'/>
@@ -128,9 +110,7 @@ class Topics extends Component {
 							</div>
 						);
 					})}
-
-				</List>
-
+				</div>
 				<div className='topics__new'>
 					<h4>Добавить новую тему</h4>
 					<form encType='multipart/form-data' ref={this.formRef} action={createBaseUrl('Topics')}>
@@ -140,7 +120,7 @@ class Topics extends Component {
 						<Button type='submit' disabled={!(addTextTitle.trim() && addTextDescription.trim())} onClick={this.handleNewSubmit}>Добавить</Button>
 					</form>
 				</div>
-			</Card>
+			</Card>	
 		);
 	}
 }

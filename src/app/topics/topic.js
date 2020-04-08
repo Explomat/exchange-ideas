@@ -108,6 +108,7 @@ class Topic extends Component {
 								}
 							/>
 					)}
+					{topic.image_id && <img className='topic__image' src={`/download_file.html?file_id=${topic.image_id}`} />}
 					{isEdit ? <Input.TextArea value={topic.description} onChange={this.handleChangeDescription} /> : <div className='topic__body_description'>{topic.description}</div>}
 					{isEdit && <Button key='save-edit' type='primary' size='small' className='topic__header_save-button' onClick={this.handleSave}>Сохранить</Button>}
 				</div>

@@ -58,10 +58,6 @@
 	border-bottom: 1px solid #4444443b;
 }
 
-.ant-tree-node-content-wrapper {
-	border-bottom: 1px dashed #00000070;
-}
-
 .ant-tree-node-content-wrapper:last-child {
 	border-bottom: none;
 }

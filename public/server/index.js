@@ -1,6 +1,6 @@
 <%
 
-//curUserID = 6711785032659205612; // me test
+curUserID = 6711785032659205612; // me test
 //curUserID = 6719948502038810952; // volkov test
 
 var Topics = OpenCodeLib('x-local://wt/web/vsk/portal/exchange-ideas/server/topic.js');
@@ -45,7 +45,7 @@ function post_Topics(queryObjects) {
 	var topicId = queryObjects.GetOptProperty('id');
 
 	var data = queryObjects.Request.Form;
-	alert(tools.object_to_text(data, 'json'));
+	//alert(tools.object_to_text(data, 'json'));
 	//var data = tools.read_object(queryObjects.Body);
 	var title = data.GetOptProperty('title');
 	var description = data.GetOptProperty('description'); //data.GetOptProperty('description');
@@ -58,23 +58,19 @@ function post_Topics(queryObjects) {
 
 	// create new
 	if (topicId == undefined) {
-		alert(1);
-		alert('title:' + title);
-		alert('description:' + description);
 		try {
+			if (!Topics.isAccessToAdd(curUserID)) {
+				return Utils.setError('У вас нет прав на создание');
+			}
+
 			var userDoc = OpenDoc(UrlFromDocID(curUserID));
-			alert(2);
 
 			if (file != undefined) {
-				alert(3);
 				var resDoc = Utils.createResourseWithImage(curUserID, String(userDoc.TopElem.fullname), file.FileName, file);
 				resId = resDoc.DocID;
 			}
 
-			alert(4);
-
 			var topicDoc = Topics.create(title, description, resId, curUserID, userDoc.TopElem.fullname);
-			alert(5);
 			return Utils.setSuccess(topicDoc);
 		} catch(e) {
 			return Utils.setError(e);
@@ -83,6 +79,10 @@ function post_Topics(queryObjects) {
 
 	//update
 	try {
+		if (!Topics.isAccessToUpdate(curUserID)) {
+			return Utils.setError('У вас нет прав на обновление');
+		}
+
 		if (file != undefined) {
 			//удаляем старый файл
 			var curDoc = OpenDoc(UrlFromDocID(Int(topicId)));
@@ -113,6 +113,10 @@ function delete_Topics(queryObjects) {
 
 	if (topicId != undefined) {
 		try {
+			if (!Topics.isAccessToRemove(curUserID)) {
+				return Utils.setError('У вас нет прав на удаление');
+			}
+
 			Topics.remove(topicId);
 			return Utils.setSuccess();
 		} catch(e) {
@@ -166,9 +170,9 @@ function post_Ideas(queryObjects) {
 	if (ideaId == undefined) {
 		try {
 			var userDoc = OpenDoc(UrlFromDocID(curUserID));
-
+			
 			if (file != undefined) {
-				var resDoc = Utils.createResourseWithImage(curUserID, String(userDoc.TopElem.fullname), file.FileName, file.fileType, file);
+				var resDoc = Utils.createResourseWithImage(curUserID, String(userDoc.TopElem.fullname), file.FileName, file);
 				resId = resDoc.DocID;
 			}
 

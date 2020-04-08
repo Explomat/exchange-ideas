@@ -45,14 +45,10 @@ export function removeIdea(id){
 	}
 };
 
-export function newIdea(title, description, topic_id){
+export function newIdea(data, topic_id){
 	return (dispatch, getState) => {
-		request('Ideas')
-			.post({
-				title,
-				description,
-				topic_id
-			})
+		request('Ideas', { topic_id })
+			.form(data)
 			.then(r => r.json())
 			.then(d => {
 				if (d.type === 'error'){

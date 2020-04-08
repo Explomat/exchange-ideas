@@ -10,7 +10,7 @@ function _setComputedFields(obj, user_id) {
 
 	var authorDoc = OpenDoc(UrlFromDocID(Int(obj.author_id)));
 
-	obj.publish_date = StrXmlDate(DateNewTime(Date(obj.publish_date)));
+	obj.publish_date = StrXmlDate(Date(obj.publish_date));
 	obj.pict_url = String(authorDoc.TopElem.pict_url);
 
 	obj.meta = {

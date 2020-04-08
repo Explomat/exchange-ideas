@@ -4,6 +4,7 @@ import { withRouter } from 'react-router';
 import { Icon, Input, Button, Tooltip } from 'antd';
 import Rate from '../components/rate';
 import IconText from '../components/iconText';
+import createBaseUrl from '../../utils/request';
 import { Link } from 'react-router-dom';
 
 import { getIdeas, removeIdea, newIdea, rateIdea } from './ideasActions';
@@ -17,17 +18,34 @@ class Ideas extends Component {
 
 		this.handleChangeAddTitle = this.handleChangeAddTitle.bind(this);
 		this.handleChangeAddDescription = this.handleChangeAddDescription.bind(this);
-		this.handleAdd = this.handleAdd.bind(this);
+		//this.handleAdd = this.handleAdd.bind(this);
+		this.handleNewSubmit = this.handleNewSubmit.bind(this);
 
 		this.state = {
 			addTextTitle: '',
-			addTextDescription: ''
+			addTextDescription: '',
+			addFile: null
 		}
+
+		this.formRef = React.createRef();
 	}
 
 	componentDidMount(){
 		const { match, getIdeas } = this.props;
 		getIdeas(match.params.id);
+	}
+
+	handleNewSubmit(e) {
+		e.preventDefault();
+		const formData = new FormData(this.formRef.current);
+		const { match, newIdea} = this.props;
+
+		newIdea(formData, match.params.id);
+
+		this.setState({
+			addTextTitle: '',
+			addTextDescription: ''
+		});
 	}
 
 	handleChangeAddTitle(e) {
@@ -42,7 +60,7 @@ class Ideas extends Component {
 		});
 	}
 
-	handleAdd() {
+	/*handleAdd() {
 		const { addTextTitle, addTextDescription } = this.state;
 		const { match, newIdea} = this.props;
 
@@ -52,7 +70,7 @@ class Ideas extends Component {
 			addTextTitle: '',
 			addTextDescription: ''
 		});
-	}
+	}*/
 
 	render() {
 		const { ideas, match, removeIdea, rateIdea } = this.props;
@@ -94,9 +112,12 @@ class Ideas extends Component {
 
 				<div className='ideas__new'>
 					<h4>Добавить новую идею</h4>
-					<Input className='ideas__new_title' value={addTextTitle} placeholder='Название' onChange={this.handleChangeAddTitle}/>
-					<Input.TextArea className='ideas__new_description' value={addTextDescription} placeholder='Описание' onChange={this.handleChangeAddDescription}/>
-					<Button type='primary' disabled={!(addTextTitle.trim() && addTextDescription.trim())} onClick={this.handleAdd}>Добавить</Button>
+					<form encType='multipart/form-data' ref={this.formRef} action={createBaseUrl('Ideas')}>
+						<Input name='title' className='ideas__new_title' value={addTextTitle} placeholder='Название' onChange={this.handleChangeAddTitle}/>
+						<Input.TextArea name='description' className='ideas__new_description' value={addTextDescription} placeholder='Описание' onChange={this.handleChangeAddDescription}/>
+						{/*<UploadButton accept='image/x-png,image/gif,image/jpeg'/>*/}
+						<Button type='submit' disabled={!(addTextTitle.trim() && addTextDescription.trim())} onClick={this.handleNewSubmit}>Добавить</Button>
+					</form>
 				</div>
 			</div>
 		);

@@ -70,7 +70,8 @@ class Comment extends Component {
 		e.preventDefault();
 
 		this.setState({
-			isNew: !this.state.isNew
+			isNew: !this.state.isNew,
+			newText: ''
 		});
 	}
 
@@ -95,7 +96,7 @@ class Comment extends Component {
 					)}
 					<span>
 						<a href={'/view_doc.html?mode=collaborator&object_id=' + author_id}>{author_fullname}</a>
-						<span className='comment__publish-date'>{new Date(publish_date).toLocaleDateString()}</span>
+						<span className='comment__publish-date'>{new Date(publish_date).toLocaleDateString('ru-RU', { hour: 'numeric', minute: 'numeric' })}</span>
 					</span>
 					<span className='comment__header_crud'>
 						{!isEdit && meta.canEdit && <Tooltip title='Удалить'><Icon type='delete' style={{ padding: '10px' }} onClick={this.handleRemove}/></Tooltip>}
