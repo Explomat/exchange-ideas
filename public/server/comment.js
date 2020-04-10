@@ -1,3 +1,22 @@
+function _getModeratorActions(user_id) {
+	var actions = [];
+
+	var actionsq = XQuery("sql: \n\
+		select ccia.action \n\
+		from cc_exchange_ideas_roles ccir \n\
+		inner join cc_exchange_ideas_moderators ccim on ccim.role_id = ccir.id \n\
+		inner join cc_exchange_ideas_actions ccia on ccia.role_id = ccim.role_id \n\
+		where \n\
+			ccim.user_id = " + user_id + " \n\
+			and ccia.object_type = 'cc_exchange_ideas_comment'");
+
+	for (el in actionsq) {
+		actions.push(String(el.action));
+	}
+
+	return actions;
+}
+
 function _setComputedFields(obj, user_id) {
 	var l = ArrayOptFirstElem(XQuery("sql: \n\
 		select id \n\
@@ -7,7 +26,8 @@ function _setComputedFields(obj, user_id) {
 			and object_id = " + obj.id + " \n\
 			and user_id = " + user_id + " \n\
 	"));
-
+	
+	var actions = _getModeratorActions(user_id);
 	var authorDoc = OpenDoc(UrlFromDocID(Int(obj.author_id)));
 
 	obj.publish_date = StrXmlDate(Date(obj.publish_date));
@@ -15,8 +35,8 @@ function _setComputedFields(obj, user_id) {
 
 	obj.meta = {
 		isLiked: (l != undefined),
-		canEdit: (Int(obj.author_id) == Int(user_id)),
-		canDelete: (Int(obj.author_id) == Int(user_id))
+		canEdit: (Int(obj.author_id) == Int(user_id) || (ArrayOptFind(actions, "This == 'update'") != undefined)),
+		canDelete: (Int(obj.author_id) == Int(user_id) || (ArrayOptFind(actions, "This == 'remove'") != undefined))
 	}
 
 	return obj;
@@ -168,4 +188,24 @@ function like(comment_id, user_id) {
 	commentDoc.Save();
 
 	return _setComputedFields(Utils.toJSObject(commentDoc.TopElem), user_id);
+}
+
+
+function isAccessToUpdate(user_id, author_id) {
+	var actions = _getModeratorActions(user_id);
+	var updateAction = ArrayOptFind(actions, "This == 'update'");
+	return ((updateAction != undefined) || (Int(author_id) == Int(user_id)));
+}
+
+function isAccessToRemove(user_id, author_id) {
+	var actions = _getModeratorActions(user_id);
+	var removeAction = ArrayOptFind(actions, "This == 'remove'");
+	return ((removeAction != undefined) || (Int(author_id) == Int(user_id)));
+}
+
+function isAccessToAdd(user_id) {
+	/*var actions = _getModeratorActions(user_id);
+	var addAction = ArrayOptFind(actions, "This == 'add'");
+	return (addAction != undefined);*/
+	return true;
 }

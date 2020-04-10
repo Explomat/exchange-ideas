@@ -89,10 +89,10 @@ class Ideas extends Component {
 								<span className='ideas__idea-list_body_pubish-date'>{new Date(item.publish_date).toLocaleDateString()}</span>
 							</div>
 							<div className='ideas__idea-list_footer'>
-								<Rate text={parseInt(item.rate, 10)} className='icon-text' disabled={item.meta.isRated} onChange={val => rateIdea(item.id, val)}/>
+								<Rate text={parseInt(item.rate, 10)} className='ideas__idea-list_icon-text' disabled={item.meta.isRated} onChange={val => rateIdea(item.id, val)}/>
 								<Tooltip title='Комментарии'>
 									<span>
-										<IconText type='message' text={item.comments_count} className='icon-text'/>
+										<IconText type='message' text={item.comments_count}/>
 									</span>
 								</Tooltip>
 								{item.meta.canDelete &&

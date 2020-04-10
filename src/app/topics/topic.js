@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
 import { PageHeader, Icon, Card, Input, Button, Tooltip } from 'antd';
+import UploadFile from  '../components/uploadFile';
+import { createBaseUrl } from '../../utils/request';
 import Ideas from '../ideas';
 import { getTopic, saveTopic, onChange } from './topicsActions';
 import './index.css';
@@ -15,6 +17,8 @@ class Topic extends Component {
 		this.handleChangeTitle = this.handleChangeTitle.bind(this);
 		this.handleChangeDescription = this.handleChangeDescription.bind(this);
 		this.handleSave = this.handleSave.bind(this);
+		this.handleUploadFile = this.handleUploadFile.bind(this);
+		this.handleRemoveFile = this.handleRemoveFile.bind(this);
 
 		this.state = {
 			isEdit: false
@@ -24,6 +28,22 @@ class Topic extends Component {
 	componentDidMount(){
 		const { getTopic, match } = this.props;
 		getTopic(match.params.id);
+	}
+
+	handleUploadFile(f) {
+		const { onChange } = this.props;
+
+		onChange({
+			image_id: f.id
+		});
+	}
+
+	handleRemoveFile() {
+		const { onChange } = this.props;
+
+		onChange({
+			image_id: ''
+		});
 	}
 
 	handleToggleEdit() {
@@ -59,6 +79,7 @@ class Topic extends Component {
 	render() {
 		const { topic, history } = this.props;
 		const { isEdit } = this.state;
+		//console.log((!!topic.image_id || isAddFileUploaded));
 
 		/*return (
 			<Card
@@ -89,9 +110,22 @@ class Topic extends Component {
 					{isEdit && <Button type='primary' size='small' className='topic__header_save-button' onClick={this.handleSave}>Сохранить</Button>}*/}
 				</div>
 				<div className='topic__body'>
-					{isEdit ?
-						<Input value={topic.title} onChange={this.handleChangeTitle} /> :
-						(
+					{isEdit ? (
+						<div>
+							<Input value={topic.title} onChange={this.handleChangeTitle} />
+							<Input.TextArea value={topic.description} onChange={this.handleChangeDescription} />
+							<UploadFile
+								url={createBaseUrl('File')}
+								accept='image/x-png,image/gif,image/jpeg'
+								disabled={!!topic.image_id}
+								fileList={ !!topic.image_id ? [{id: topic.image_id}] : null}
+								onSuccess={this.handleUploadFile}
+								onRemove={this.handleRemoveFile}
+							/>
+							<Button key='save-edit' type='primary' size='small' className='topic__header_save-button' onClick={this.handleSave}>Сохранить</Button>
+						</div>
+					) : (
+						<div>
 							<PageHeader
 								onBack={history.goBack}
 								title={<h3 className='topic__body_title'>{topic.title}</h3>}
@@ -107,10 +141,33 @@ class Topic extends Component {
 									(!isEdit && (topic.meta && topic.meta.canEdit) && <Tooltip title='Реактировать'><Icon type='edit' onClick={this.handleToggleEdit} /></Tooltip>)
 								}
 							/>
+							{topic.image_id && <img className='topic__image' src={`/download_file.html?file_id=${topic.image_id}`} />}
+							<div className='topic__body_description'>{topic.description}</div>
+						</div>
+					)}
+
+					{/*{isEdit ?
+						<Input value={topic.title} onChange={this.handleChangeTitle} /> :
+						(
+							<PageHeader
+								onBack={history.goBack}
+								title={<h3 className='topic__body_title'>{topic.title}</h3>}
+								subTitle={
+									<span>
+										<span className='topic__header_author-fullname'>
+											{topic.author_fullname}
+										</span>
+										<span className='topic__header_publish-date'>{topic.publish_date}</span>
+									</span>
+								}
+								extra={
+									(!isEdit && (topic.meta && topic.meta.canEdit) && <Tooltip title='Реактировать'><Icon type='edit' onClick={this.handleToggleEdit} /></Tooltip>)
+								}
+							/>
 					)}
 					{topic.image_id && <img className='topic__image' src={`/download_file.html?file_id=${topic.image_id}`} />}
 					{isEdit ? <Input.TextArea value={topic.description} onChange={this.handleChangeDescription} /> : <div className='topic__body_description'>{topic.description}</div>}
-					{isEdit && <Button key='save-edit' type='primary' size='small' className='topic__header_save-button' onClick={this.handleSave}>Сохранить</Button>}
+					{isEdit && <Button key='save-edit' type='primary' size='small' className='topic__header_save-button' onClick={this.handleSave}>Сохранить</Button>}*/}
 				</div>
 				<div className='topic__footer'>
 					<Ideas/>

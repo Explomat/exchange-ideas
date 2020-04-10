@@ -5,7 +5,7 @@ function _getModeratorActions(user_id) {
 		select ccia.action \n\
 		from cc_exchange_ideas_roles ccir \n\
 		inner join cc_exchange_ideas_moderators ccim on ccim.role_id = ccir.id \n\
-		inner join cc_exchange_ideas_actions ccia on ccia.moderator_id = ccim.id \n\
+		inner join cc_exchange_ideas_actions ccia on ccia.role_id = ccim.role_id \n\
 		where \n\
 			ccim.user_id = " + user_id + " \n\
 			and ccia.object_type = 'cc_exchange_ideas_topic'");
@@ -33,8 +33,8 @@ function _setComputedFields(obj, user_id) {
 
 	obj.meta = {
 		isRated: (l != undefined),
-		canEdit: (Int(obj.author_id) == Int(user_id)),
-		canDelete: (Int(obj.author_id) == Int(user_id))
+		canEdit: (ArrayOptFind(actions, "This == 'update'") != undefined),
+		canDelete: (ArrayOptFind(actions, "This == 'remove'") != undefined)
 	}
 
 	//obj.isRated = (l != undefined) ? 1 : 0;
@@ -103,7 +103,7 @@ function remove(id) {
 
 	var topicDoc = OpenDoc(UrlFromDocID(Int(id)));
 	var resId = topicDoc.TopElem.image_id;
-	if (resId != null && resId != undefined) {
+	if (resId != null && resId != undefined && resId != '') {
 		DeleteDoc(UrlFromDocID(Int(resId)));
 	}
 	DeleteDoc(UrlFromDocID(Int(id)));

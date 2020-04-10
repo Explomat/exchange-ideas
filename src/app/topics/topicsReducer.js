@@ -29,20 +29,24 @@ const topicsReducer = (state = {
 	currentTopic: {},
 	ui: {
 		isLoading: false
-	}
+	},
+	meta: {
+		canAdd: false
+	},
 }, action) => {
 	switch(action.type) {
 		case constants.TOPICS_FETCH_SUCCESS: {
 			return {
 				...state,
-				list: action.payload
+				list: action.payload.topics,
+				meta: action.payload.meta
 			}
 		}
 
 		case constants.TOPIC_FETCH_SUCCESS: {
 			return {
 				...state,
-				currentTopic: action.payload
+				currentTopic: action.payload.topics
 			}
 		}
 

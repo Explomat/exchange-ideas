@@ -14,7 +14,7 @@ class UploadButton extends Component {
 	}
 
 	handleChange(e) {
-		if (e.target.files) {
+		if (e.target.files.length) {
 			this.setState({
 				filename: e.target.files[0].name
 			});

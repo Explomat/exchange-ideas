@@ -54,10 +54,19 @@ export function removeTopic(id){
 	}
 };
 
-export function newTopic(data){
+export function newTopic(title, description, file){
 	return dispatch => {
+		const obj = {
+			title,
+			description
+		}
+
+		if (file) {
+			obj.file = file;
+		}
+
 		request('Topics')
-			.form(data)
+			.post(obj)
 			.then(r => r.json())
 			.then(d => {
 				if (d.type === 'error'){

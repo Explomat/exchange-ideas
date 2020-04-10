@@ -1,9 +1,13 @@
 .ideas__idea-list {
 	position: relative;
-	border: 2px solid #0066a0;
+	border: 1px solid #0066a0;
     padding: 8px;
     border-radius: 4px;
     margin-bottom: 12px;
+}
+
+.ideas__idea-list_icon-text {
+	margin-right: 8px;
 }
 
 .ideas__idea-list_body_icon {

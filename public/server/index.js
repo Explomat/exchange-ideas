@@ -1,6 +1,6 @@
 <%
 
-curUserID = 6711785032659205612; // me test
+//curUserID = 6711785032659205612; // me test
 //curUserID = 6719948502038810952; // volkov test
 
 var Topics = OpenCodeLib('x-local://wt/web/vsk/portal/exchange-ideas/server/topic.js');
@@ -25,7 +25,14 @@ function get_Topics(queryObjects) {
 		return Utils.setError(e);
 	}
 	
-	return Utils.setSuccess(topics);
+	var actions = Utils.getModeratorActions(curUserID, 'cc_exchange_ideas_topic');
+
+	return Utils.setSuccess({
+		topics: topics,
+		meta: {
+			canAdd: (ArrayOptFind(actions, "This == 'add'") != undefined)
+		}
+	});
 }
 
 function post_TopicsRate(queryObjects) {
@@ -44,11 +51,12 @@ function post_TopicsRate(queryObjects) {
 function post_Topics(queryObjects) {
 	var topicId = queryObjects.GetOptProperty('id');
 
-	var data = queryObjects.Request.Form;
+	//var data = queryObjects.Request.Form;
 	//alert(tools.object_to_text(data, 'json'));
-	//var data = tools.read_object(queryObjects.Body);
+	var data = tools.read_object(queryObjects.Body);
 	var title = data.GetOptProperty('title');
 	var description = data.GetOptProperty('description'); //data.GetOptProperty('description');
+	var imageId = data.GetOptProperty('image_id');
 	var file = data.GetOptProperty('file'); //data.GetOptProperty('file');
 	var resId = null;
 
@@ -65,10 +73,11 @@ function post_Topics(queryObjects) {
 
 			var userDoc = OpenDoc(UrlFromDocID(curUserID));
 
-			if (file != undefined) {
+			/*if (file != undefined) {
 				var resDoc = Utils.createResourseWithImage(curUserID, String(userDoc.TopElem.fullname), file.FileName, file);
 				resId = resDoc.DocID;
-			}
+			}*/
+			resId = file != undefined ? file.id : null;
 
 			var topicDoc = Topics.create(title, description, resId, curUserID, userDoc.TopElem.fullname);
 			return Utils.setSuccess(topicDoc);
@@ -80,25 +89,28 @@ function post_Topics(queryObjects) {
 	//update
 	try {
 		if (!Topics.isAccessToUpdate(curUserID)) {
-			return Utils.setError('У вас нет прав на обновление');
+			return Utils.setError('У вас нет прав на редактирование');
 		}
 
-		if (file != undefined) {
+		//if (file != undefined) {
 			//удаляем старый файл
-			var curDoc = OpenDoc(UrlFromDocID(Int(topicId)));
-			DeleteDoc(UrlFromDocID(Int(curDoc.TopElem.image_id)))
+			/*var curDoc = OpenDoc(UrlFromDocID(Int(topicId)));
+			DeleteDoc(UrlFromDocID(Int(curDoc.TopElem.image_id)));*/
+		//	DeleteDoc(UrlFromDocID(Int(file.id)))
 
 			//созлаем новый
-			var userDoc = OpenDoc(UrlFromDocID(curUserID));
-			var resDoc = Utils.createResourseWithImage(curUserID, String(userDoc.TopElem.fullname), file.fileName, file.fileType, file);
-			resId = resDoc.DocID;
-		}
+			//var userDoc = OpenDoc(UrlFromDocID(curUserID));
+		//	resId = file != undefined ? file.id : null;
+
+			/*var resDoc = Utils.createResourseWithImage(curUserID, String(userDoc.TopElem.fullname), file.fileName, file.fileType, file);
+			resId = resDoc.DocID;*/
+		//}
 
 		//alert('update topic: 1');
 		var topicDoc = Topics.update(topicId, {
 			title: title,
 			description: description,
-			image_id: resId
+			image_id: imageId
 		}, curUserID);
 		//alert('update topic: 2');
 		return Utils.setSuccess(topicDoc);
@@ -169,6 +181,10 @@ function post_Ideas(queryObjects) {
 	// create new
 	if (ideaId == undefined) {
 		try {
+			if (!Ideas.isAccessToAdd(curUserID)) {
+				return Utils.setError('У вас нет прав на создание');
+			}
+
 			var userDoc = OpenDoc(UrlFromDocID(curUserID));
 			
 			if (file != undefined) {
@@ -186,6 +202,11 @@ function post_Ideas(queryObjects) {
 
 	//update
 	try {
+		var _ideaDoc = OpenDoc(UrlFromDocID(Int(ideaId)));
+		if (!Ideas.isAccessToUpdate(curUserID, _ideaDoc.TopElem.author_id)) {
+			return Utils.setError('У вас нет прав на редактирование');
+		}
+
 		if (file != undefined) {
 			//удаляем старый файл
 			var curDoc = OpenDoc(UrlFromDocID(Int(ideaId)));
@@ -216,6 +237,12 @@ function delete_Ideas(queryObjects) {
 
 	if (ideaId != undefined) {
 		try {
+			var ideaDoc = OpenDoc(UrlFromDocID(Int(ideaId)));
+
+			if (!Ideas.isAccessToRemove(curUserID, ideaDoc.TopElem.author_id)) {
+				return Utils.setError('У вас нет прав на удаление');
+			}
+
 			Ideas.remove(ideaId);
 			return Utils.setSuccess();
 		} catch(e) {
@@ -265,6 +292,10 @@ function post_Comments(queryObjects) {
 	// create new
 	if (commentId == undefined) {
 		try {
+			if (!Comments.isAccessToAdd(curUserID)) {
+				return Utils.setError('У вас нет прав на создание');
+			}
+
 			var parentId = data.GetOptProperty('parent_id');
 			var ideaId = data.GetOptProperty('idea_id');
 			var userDoc = OpenDoc(UrlFromDocID(curUserID));
@@ -277,13 +308,13 @@ function post_Comments(queryObjects) {
 
 	//update
 	try {
-		var likes = data.GetOptProperty('likes');
-		var objUpdate = {
-			text: text
+		var _commentDoc = OpenDoc(UrlFromDocID(Int(commentId)));
+		if (!Comments.isAccessToUpdate(curUserID, _commentDoc.TopElem.author_id)) {
+			return Utils.setError('У вас нет прав на редактирование');
 		}
 
-		if (likes != undefined) {
-			objUpdate.likes = likes;
+		var objUpdate = {
+			text: text
 		}
 
 		var commentDoc = Comments.update(commentId, objUpdate, curUserID);
@@ -299,6 +330,10 @@ function delete_Comments(queryObjects) {
 
 	if (commentId != undefined) {
 		try {
+			var commentDoc = OpenDoc(UrlFromDocID(Int(commentId)));
+			if (!Comments.isAccessToRemove(curUserID, commentDoc.TopElem.author_id)) {
+				return Utils.setError('У вас нет прав на удаление');
+			}
 			var deletedIds = Comments.remove(commentId);
 			return Utils.setSuccess(deletedIds);
 		} catch(e) {
@@ -307,6 +342,36 @@ function delete_Comments(queryObjects) {
 	}
 
 	return Utils.setError('Unknown parameters');
+}
+
+function post_File(queryObjects) {
+	var data = queryObjects.Request.Form;
+	var file = data.GetOptProperty('file');
+
+	if (file == undefined) {
+		return Utils.setError('Unknown parameters');
+	}
+
+	var userDoc = OpenDoc(UrlFromDocID(curUserID));
+	var resDoc = Utils.createResourseWithImage(curUserID, userDoc.TopElem.fullname, file.FileName, file);
+
+	return Utils.setSuccess(Utils.toJSObject(resDoc.TopElem));
+}
+
+function delete_File(queryObjects) {
+	var data = tools.read_object(queryObjects.Body);
+	var resId = data.GetOptProperty('id');
+
+	if (resId != undefined) {
+		try {
+			DeleteDoc(UrlFromDocID(Int(resId)));
+			return Utils.setSuccess();
+		} catch(e) {
+			return Utils.setError(e);
+		}
+	}
+
+	return Utils.setError('Unknown parameters');	
 }
 
 %>
