@@ -5,7 +5,7 @@ import UploadFile from  '../components/uploadFile';
 import { createBaseUrl } from '../../utils/request';
 import toBoolean from '../../utils/toBoolean';
 import Ideas from '../ideas';
-import { getTopic, saveTopic, onChange } from './topicsActions';
+import { getTopic, saveTopic, archiveTopic, onChange } from './topicsActions';
 import './index.css';
 
 
@@ -70,14 +70,9 @@ class Topic extends Component {
 		});
 	}
 
-	handleChangeStatus() {
-		const { topic, onChange, saveTopic } = this.props;
-
-		onChange({
-			is_archive: true
-		});
-
-		saveTopic(topic.id);
+	handleChangeStatus(isArchive) {
+		const { topic, archiveTopic } = this.props;
+		archiveTopic(topic.id, isArchive);
 	}
 
 	handleSave() {
@@ -147,8 +142,13 @@ class Topic extends Component {
 											{topic.author_fullname}
 										</span>
 										{toBoolean(topic.is_archive) ?
-											<Tag className='topic__body_status' color='orange'>В архиве</Tag>
-											: (topic.meta && topic.meta.canEdit && <Button type='primary' size='small' onClick={this.handleChangeStatus}>Переместить в архив</Button>)
+											(
+												<span>
+													<Tag className='topic__body_status' color='orange'>В архиве</Tag>
+													<Button type='primary' size='small' onClick={() => this.handleChangeStatus(false)}>Активировать</Button>
+												</span>
+											)
+											: (topic.meta && topic.meta.canEdit && <Button type='primary' size='small' onClick={() => this.handleChangeStatus(true)}>Переместить в архив</Button>)
 										}
 									</span>
 								}
@@ -198,4 +198,4 @@ function mapStateToProps(state){
 	}
 }
 
-export default connect(mapStateToProps, { getTopic, saveTopic, onChange })(Topic);
+export default connect(mapStateToProps, { getTopic, saveTopic, archiveTopic, onChange })(Topic);

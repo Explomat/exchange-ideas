@@ -22,6 +22,11 @@ body {
 	font-family: Roboto, Arial,Helvetica, sans-serif;
 }
 
+@font-face {
+  font-family: "GothamPro-Black";
+  src: url("./images/GothamPro.3100f91b.ttf") format("ttf");
+}
+
 #root {
 	max-width: 1050px;
 }

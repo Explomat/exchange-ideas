@@ -34,7 +34,9 @@ const topicsReducer = (state = {
 		canAdd: false,
 		page: 1,
 		pageSize: 1,
-		total: 1
+		total: 1,
+		searchText: '',
+		statusText: 'all'
 	},
 }, action) => {
 	switch(action.type) {
@@ -42,7 +44,10 @@ const topicsReducer = (state = {
 			return {
 				...state,
 				list: action.payload.topics,
-				meta: action.payload.meta
+				meta: {
+					...state.meta,
+					...action.payload.meta
+				}
 			}
 		}
 
@@ -60,6 +65,18 @@ const topicsReducer = (state = {
 				...state,
 				currentTopic: {
 					...state.currentTopic,
+					...data
+				}
+			}
+		}
+
+		case constants.TOPICS_CHANGE_META: {
+			const { data } = action.payload;
+
+			return {
+				...state,
+				meta: {
+					...state.meta,
 					...data
 				}
 			}

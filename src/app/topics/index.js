@@ -6,7 +6,7 @@ import IconText from '../components/iconText';
 import UploadFile from  '../components/uploadFile';
 import { createBaseUrl } from '../../utils/request';
 import { Link } from 'react-router-dom';
-import { getTopics, removeTopic, newTopic, rateTopic } from './topicsActions';
+import { getTopics, removeTopic, newTopic, rateTopic, onChangeMeta } from './topicsActions';
 import toBoolean from '../../utils/toBoolean';
 import unnamedImage from '../../images/unnamed_image.png';
 import './index.css';
@@ -21,23 +21,59 @@ class Topics extends Component {
 		this.handleNewSubmit = this.handleNewSubmit.bind(this);
 		this.handleUploadFile = this.handleUploadFile.bind(this);
 		this.handleRemoveFile = this.handleRemoveFile.bind(this);
+		this.handleChangeSearchText = this.handleChangeSearchText.bind(this);
+		this.handleChangeStatusText = this.handleChangeStatusText.bind(this);
+		this.handleChangePagination = this.handleChangePagination.bind(this);
+		this.handleSearch = this.handleSearch.bind(this);
 
 		this.state = {
-			searchText: '',
-			searchStatus: '',
-			page: 1,
-			pageSize: 1,
 			addTextTitle: '',
 			addTextDescription: '',
 			addFile: null,
 			isAddFileUploaded: false
 		}
-
 		//this.formRef = React.createRef();
 	}
 
 	componentDidMount(){
-		this.props.getTopics();
+		const { meta } = this.props;
+		this.props.getTopics(meta.searchText, meta.statusText, meta.page);
+	}
+
+	handleChangeSearchText(e) {
+		const { onChangeMeta, getTopics, meta } = this.props;
+		onChangeMeta({
+			searchText: e.target.value
+		});
+	}
+
+	handleChangeStatusText(statusText) {
+		const { onChangeMeta, getTopics, meta } = this.props;
+		onChangeMeta({
+			statusText,
+			page: 1
+		});
+
+		getTopics(meta.searchText, statusText, 1);
+	}
+
+	handleChangePagination(page, pageSize) {
+		const { onChangeMeta, getTopics, meta } = this.props;
+		onChangeMeta({
+			page,
+			pageSize
+		});
+
+		getTopics(meta.searchText, meta.statusText, page);
+	}
+
+	handleSearch(val) {
+		const { onChangeMeta, getTopics, meta } = this.props;
+		onChangeMeta({
+			page: 1
+		});
+
+		getTopics(meta.searchText, meta.statusText, 1);
 	}
 
 	handleUploadFile(f) {
@@ -96,7 +132,7 @@ class Topics extends Component {
 
 		return (
 			<div className='topics-container'>
-				<h1 className='topics-container__title'>Биржа идей</h1>
+				<div className='topics-container__title'>Биржа идей</div>
 				<div className='topics'>
 					<div className='topics__filters'>
 						<Input
@@ -104,18 +140,13 @@ class Topics extends Component {
 							
 							placeholder='Поиск'
 							prefix={<Icon type='search' style={{ color: 'rgba(0,0,0,.25)' }} />}
-							onPressEnter={() => getTopics(this.state.searchText, this.state.searchStatus, this.state.page)}
-							onChange={e => this.setState({ searchText: e.target.value })}
+							onPressEnter={this.handleSearch}
+							onChange={this.handleChangeSearchText}
 						/>
 						<Select
 							className='topics__filters_status'
-							defaultValue='all'
-							onSelect={(val) => {
-								this.setState({
-									searchStatus: val
-								});
-								getTopics(this.state.searchText, val, this.state.page);
-							}}
+							value={meta.statusText}
+							onSelect={this.handleChangeStatusText}
 						>
 							<Select.Option value='all'>Все темы</Select.Option>
 							<Select.Option value='active'>Активные</Select.Option>
@@ -150,7 +181,11 @@ class Topics extends Component {
 									{item.meta.canDelete &&
 										<Tooltip title='Удалить'>
 											<span>
-												<IconText type='delete' className='topics__topic-list_footer_delete' onClick={(() => removeTopic(item.id))}/>
+												<IconText type='delete' className='topics__topic-list_footer_delete' onClick={() => {
+													if (window.confirm(`Вы действительно хотите удалить тему "${item.title} ?"`)) {
+														removeTopic(item.id);
+													}
+												}}/>
 											</span>
 										</Tooltip>
 									}
@@ -167,13 +202,7 @@ class Topics extends Component {
 					current={meta.page}
 					pageSize={meta.pageSize}
 					total={meta.total}
-					onChange={(page, pageSize) => {
-						this.setState({
-							page,
-							pageSize
-						});
-						getTopics(this.state.searchText, this.state.searchStatus, page);
-					}}
+					onChange={this.handleChangePagination}
 				/>
 				{meta.canAdd && <div className='topics__new'>
 					<h4>Добавить новую тему</h4>
@@ -200,4 +229,4 @@ function mapStateToProps(state){
 	}
 }
 
-export default connect(mapStateToProps, { getTopics, removeTopic, newTopic, rateTopic })(Topics);
+export default connect(mapStateToProps, { getTopics, removeTopic, newTopic, rateTopic, onChangeMeta })(Topics);

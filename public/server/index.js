@@ -1,6 +1,6 @@
 <%
 
-//curUserID = 6711785032659205612; // me test
+curUserID = 6711785032659205612; // me test
 //curUserID = 6719948502038810952; // volkov test
 
 var Topics = OpenCodeLib('x-local://wt/web/vsk/portal/exchange-ideas/server/topic.js');
@@ -20,7 +20,7 @@ function get_Topics(queryObjects) {
 	var search = queryObjects.HasProperty('search') ? queryObjects.search : '';
 	var status = queryObjects.HasProperty('status') ? queryObjects.status : '';
 	var page = queryObjects.HasProperty('page') ? OptInt(queryObjects.page) : 1;
-	var pageSize = 5;
+	var pageSize = 2;
 
 	var min = (page - 1) * pageSize;
 	var max = min + pageSize;
@@ -35,14 +35,45 @@ function get_Topics(queryObjects) {
 	return Utils.setSuccess(topicsObj);
 }
 
+function post_TopicsArchive(queryObjects) {
+	var data = tools.read_object(queryObjects.Body);
+	var topicId = data.GetOptProperty('id');
+	var isArchive = data.GetOptProperty('is_archive');
+
+	if (topicId != undefined) {
+		if (isArchive) {
+			//alert('test:' + Topics.isAccessToActivate(topicId, curUserID));
+			if (!Topics.isAccessToUpdate(topicId, curUserID)) {
+				return Utils.setError('У вас нет прав на редактирование_');
+			}
+		} else {
+			if (!Topics.isAccessToActivate(topicId, curUserID)) {
+				//alert('post_TopicsArchive: 2');
+				return Utils.setError('У вас нет прав на редактирование');
+			}
+		}
+
+		if (isArchive != undefined) {
+			var topic = Topics.archive(topicId, curUserID, isArchive);
+			return Utils.setSuccess(topic);
+		}
+	}
+
+	return Utils.setError('Topic ID not defined');
+}
+
 function post_TopicsRate(queryObjects) {
 	var data = tools.read_object(queryObjects.Body);
 	var topicId = data.GetOptProperty('id');
 	var value = data.GetOptProperty('value');
 
 	if (topicId != undefined && value != undefined) {
-		var topic = Topics.rate(topicId, curUserID, value);
-		return Utils.setSuccess(topic);
+		if (Topics.isAccessToRate(topicId)) {
+			var topic = Topics.rate(topicId, curUserID, value);
+			return Utils.setSuccess(topic);
+		} else {
+			return Utils.setError('Нет доступа');
+		}
 	}
 
 	return Utils.setError('Topic ID or value not defined');
@@ -88,7 +119,7 @@ function post_Topics(queryObjects) {
 
 	//update
 	try {
-		if (!Topics.isAccessToUpdate(curUserID)) {
+		if (!Topics.isAccessToUpdate(topicId, curUserID)) {
 			return Utils.setError('У вас нет прав на редактирование');
 		}
 
@@ -121,7 +152,7 @@ function delete_Topics(queryObjects) {
 
 	if (topicId != undefined) {
 		try {
-			if (!Topics.isAccessToRemove(curUserID)) {
+			if (!Topics.isAccessToRemove(topicId, curUserID)) {
 				return Utils.setError('У вас нет прав на удаление');
 			}
 
@@ -155,8 +186,12 @@ function post_IdeasRate(queryObjects) {
 	var value = data.GetOptProperty('value');
 
 	if (ideaId != undefined && value != undefined) {
-		var idea = Ideas.rate(ideaId, curUserID, value);
-		return Utils.setSuccess(idea);
+		if (Ideas.isAccessToRate(ideaId)) {
+			var idea = Ideas.rate(ideaId, curUserID, value);
+			return Utils.setSuccess(idea);
+		} else {
+			Utils.setError('Нет доступа');
+		}
 	}
 
 	return Utils.setError('Idea ID or value not defined');
@@ -177,7 +212,7 @@ function post_Ideas(queryObjects) {
 	// create new
 	if (ideaId == undefined) {
 		try {
-			if (!Ideas.isAccessToAdd(curUserID)) {
+			if (!Ideas.isAccessToAdd(topicId)) {
 				return Utils.setError('У вас нет прав на создание');
 			}
 
@@ -201,8 +236,7 @@ function post_Ideas(queryObjects) {
 
 	//update
 	try {
-		var _ideaDoc = OpenDoc(UrlFromDocID(Int(ideaId)));
-		if (!Ideas.isAccessToUpdate(curUserID, _ideaDoc.TopElem.author_id)) {
+		if (!Ideas.isAccessToUpdate(ideaId, curUserID)) {
 			return Utils.setError('У вас нет прав на редактирование');
 		}
 
@@ -234,23 +268,14 @@ function delete_Ideas(queryObjects) {
 	var data = tools.read_object(queryObjects.Body);
 	var ideaId = data.GetOptProperty('id');
 
-	alert('ideaId: ' + ideaId);
-
 	if (ideaId != undefined) {
 		try {
-			alert('index_delete_Ideas: 1');
-			var ideaDoc = OpenDoc(UrlFromDocID(Int(ideaId)));
-			alert('index_delete_Ideas: 2');
 
-			if (!Ideas.isAccessToRemove(curUserID, ideaDoc.TopElem.author_id)) {
+			if (!Ideas.isAccessToRemove(ideaId, curUserID)) {
 				return Utils.setError('У вас нет прав на удаление');
 			}
 
-			alert('index_delete_Ideas: 3');
-
 			Ideas.remove(ideaId);
-
-			alert('index_delete_Ideas: 4');
 			return Utils.setSuccess();
 		} catch(e) {
 			return Utils.setError(e);
@@ -272,10 +297,7 @@ function get_Comments(queryObjects) {
 		return Utils.setError(e);
 	}
 	
-	return Utils.setSuccess({
-		comments: comments
-		//tree: commentsTree
-	});
+	return Utils.setSuccess(comments);
 }
 
 function post_CommentsLike(queryObjects) {
@@ -283,8 +305,12 @@ function post_CommentsLike(queryObjects) {
 	var commentId = data.GetOptProperty('id');
 
 	if (commentId != undefined) {
-		var comment = Comments.like(commentId, curUserID);
-		return Utils.setSuccess(comment);
+		if (Comments.isAccessToLike(commentId)) {
+			var comment = Comments.like(commentId, curUserID);
+			return Utils.setSuccess(comment);
+		} else {
+			return Utils.setError('Невозможно "лайкнуть" комментарий, т.к. он в архиве');
+		}
 	}
 
 	return Utils.setError('Comment ID not defined');
@@ -299,12 +325,17 @@ function post_Comments(queryObjects) {
 	// create new
 	if (commentId == undefined) {
 		try {
-			if (!Comments.isAccessToAdd(curUserID)) {
-				return Utils.setError('У вас нет прав на создание');
-			}
-
 			var parentId = data.GetOptProperty('parent_id');
 			var ideaId = data.GetOptProperty('idea_id');
+
+			if (ideaId == undefined){
+				return Utils.setError('IdeaId not found');
+			}
+
+			if (!Comments.isAccessToAdd(ideaId)) {
+				return Utils.setError('У вас нет прав на создание');
+			}
+			
 			var userDoc = OpenDoc(UrlFromDocID(curUserID));
 			var commentDoc = Comments.create(text, curUserID, userDoc.TopElem.fullname, parentId, ideaId);
 			return Utils.setSuccess(commentDoc);
@@ -315,8 +346,7 @@ function post_Comments(queryObjects) {
 
 	//update
 	try {
-		var _commentDoc = OpenDoc(UrlFromDocID(Int(commentId)));
-		if (!Comments.isAccessToUpdate(curUserID, _commentDoc.TopElem.author_id)) {
+		if (!Comments.isAccessToUpdate(commentId, curUserID)) {
 			return Utils.setError('У вас нет прав на редактирование');
 		}
 
@@ -337,10 +367,10 @@ function delete_Comments(queryObjects) {
 
 	if (commentId != undefined) {
 		try {
-			var commentDoc = OpenDoc(UrlFromDocID(Int(commentId)));
-			if (!Comments.isAccessToRemove(curUserID, commentDoc.TopElem.author_id)) {
+			if (!Comments.isAccessToRemove(commentId, curUserID)) {
 				return Utils.setError('У вас нет прав на удаление');
 			}
+
 			var deletedIds = Comments.remove(commentId);
 			return Utils.setSuccess(deletedIds);
 		} catch(e) {

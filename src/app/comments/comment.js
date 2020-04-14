@@ -29,7 +29,10 @@ class Comment extends Component {
 		e.preventDefault();
 
 		const { id, onRemove } = this.props;
-		onRemove(id);
+
+		if (window.confirm('Вы действительно хотите удалить комментарий?')) {
+			onRemove(id);
+		}
 	}
 
 	handleSave(e) {
@@ -76,8 +79,11 @@ class Comment extends Component {
 	}
 
 	handleLike() {
-		const { id, onLike } = this.props;
-		onLike(id);
+		const { id, onLike, meta } = this.props;
+
+		if (meta.canLike) {
+			onLike(id);
+		}
 	}
 
 	render() {
@@ -105,7 +111,7 @@ class Comment extends Component {
 				</div>
 				<div>{isEdit && meta.canEdit ? <Input.TextArea value={editText} onChange={this.handleChange}/> : text}</div>
 				{isEdit && <Button type='primary' onClick={this.handleSave}>Сохранить</Button>}
-				{!isEdit && <a onClick={this.handleToggleEditNew}>Ответить</a>}
+				{!isEdit && meta.canResponse && <a onClick={this.handleToggleEditNew}>Ответить</a>}
 				{isNew && 
 					(<div>
 						<Input.TextArea value={newText} onChange={this.handleChangeNew}/>

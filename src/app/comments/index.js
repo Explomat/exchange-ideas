@@ -108,7 +108,7 @@ class Comments extends Component {
 	}
 
 	renderTree(data) {
-		const { match, removeComment, saveComment, newComment, likeComment } = this.props;
+		const { meta, match, removeComment, saveComment, newComment, likeComment } = this.props;
 
 		return data.map(item => {
 			if (item.children.length > 0) {
@@ -147,24 +147,22 @@ class Comments extends Component {
 	}
 
 	render() {
-		const { comments, commentsLength } = this.props;
+		const { meta, comments, commentsLength } = this.props;
 		const { addText } = this.state;
 
 		return (
 			<div className='comments'>
 				<h4 className='comments__list-title'>Комментарии {commentsLength}</h4>
-				{/*<HashLink to="/comments" />*/}
 				<Tree
 					defaultExpandAll={true}
-					selectable={false}
 				>
 					{this.renderTree(comments)}
 				</Tree>
-				<div className='comments__new'>
+				{meta.canAdd && <div className='comments__new'>
 					<h4>Добавить комментарий</h4>
 					<Input.TextArea className='comments__new_text' value={addText} autoSize={false} onChange={this.handleChangeAdd}/>
 					<Button type='primary' disabled={addText.trim() === ''} onClick={this.handleAdd}>Добавить</Button>
-				</div>
+				</div>}
 			</div>
 		);
 	}
@@ -173,7 +171,8 @@ class Comments extends Component {
 function mapStateToProps(state){
 	return {
 		comments: listToTree(JSON.parse(JSON.stringify(state.comments.list)), 'publish_date'),
-		commentsLength: state.comments.list.length
+		commentsLength: state.comments.list.length,
+		meta: state.comments.meta
 		//tree: state.comments.tree
 	}
 }

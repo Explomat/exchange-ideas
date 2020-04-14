@@ -1,3 +1,15 @@
+function _toBoolean(val) {
+	if (val == 'true') {
+		return true;
+	}
+
+	if (val == true) {
+		return true;
+	}
+
+	return false;
+}
+
 function _getModeratorActions(user_id) {
 	var actions = [];
 
@@ -30,14 +42,15 @@ function _setComputedFields(obj, user_id) {
 	var actions = _getModeratorActions(user_id);
 
 	obj.publish_date = StrXmlDate(DateNewTime(Date(obj.publish_date)));
+	obj.is_archive = _toBoolean(obj.is_archive);
 
 	obj.meta = {
-		isRated: (l != undefined),
-		canEdit: (ArrayOptFind(actions, "This == 'update'") != undefined),
-		canDelete: (ArrayOptFind(actions, "This == 'remove'") != undefined)
+		isRated: (l != undefined || obj.is_archive),
+		canActivate: (ArrayOptFind(actions, "This == 'update'") != undefined && obj.is_archive),
+		canEdit: (ArrayOptFind(actions, "This == 'update'") != undefined && !obj.is_archive),
+		canDelete: (ArrayOptFind(actions, "This == 'remove'") != undefined && !obj.is_archive)
 	}
 
-	//obj.isRated = (l != undefined) ? 1 : 0;
 	return obj;
 }
 
@@ -54,6 +67,7 @@ function create(title, description, image_id, author_id, author_fullname) {
 	topicDoc.TopElem.author_id = author_id;
 	topicDoc.TopElem.author_fullname = author_fullname;
 	topicDoc.TopElem.is_archive = false;
+	topicDoc.TopElem.is_anchor = false;
 
 	topicDoc.BindToDb();
 	topicDoc.Save();
@@ -227,16 +241,57 @@ function rate(id, user_id, value) {
 	return _setComputedFields(Utils.toJSObject(topicDoc.TopElem), user_id);
 }
 
-function isAccessToUpdate(user_id) {
-	var actions = _getModeratorActions(user_id);
-	var updateAction = ArrayOptFind(actions, "This == 'update'");
-	return (updateAction != undefined);
+function archive(id, user_id, is_archive) {
+	var Ideas = OpenCodeLib('x-local://wt/web/vsk/portal/exchange-ideas/server/idea.js');
+	DropFormsCache('x-local://wt/web/vsk/portal/exchange-ideas/server/idea.js');
+
+	var Utils = OpenCodeLib('x-local://wt/web/vsk/portal/exchange-ideas/server/utils.js');
+	DropFormsCache('x-local://wt/web/vsk/portal/exchange-ideas/server/utils.js');
+
+	var qideas = XQuery("sql: \n\
+		select id \n\
+		from \n\
+			cc_exchange_ideas_ideas \n\
+		where topic_id = " + id + " \n\
+	");
+
+	for (eli in qideas) {
+		try {
+			Ideas.archive(eli.id, user_id, is_archive);
+		} catch(e) {}
+	}
+
+	var topicDoc = OpenDoc(UrlFromDocID(Int(id)));
+	topicDoc.TopElem.is_archive = is_archive;
+	topicDoc.Save();
+
+	return _setComputedFields(Utils.toJSObject(topicDoc.TopElem), user_id);
 }
 
-function isAccessToRemove(user_id) {
+function isAccessToRate(id) {
+	var topicDoc = OpenDoc(UrlFromDocID(Int(id)));
+	return !topicDoc.TopElem.is_archive;
+}
+
+function isAccessToActivate(id, user_id) {
+	var actions = _getModeratorActions(user_id);
+	var updateAction = ArrayOptFind(actions, "This == 'update'");
+	var topicDoc = OpenDoc(UrlFromDocID(Int(id)));
+	return (updateAction != undefined && topicDoc.TopElem.is_archive);
+}
+
+function isAccessToUpdate(id, user_id) {
+	var actions = _getModeratorActions(user_id);
+	var updateAction = ArrayOptFind(actions, "This == 'update'");
+	var topicDoc = OpenDoc(UrlFromDocID(Int(id)));
+	return (updateAction != undefined && !topicDoc.TopElem.is_archive);
+}
+
+function isAccessToRemove(id, user_id) {
 	var actions = _getModeratorActions(user_id);
 	var removeAction = ArrayOptFind(actions, "This == 'remove'");
-	return (removeAction != undefined);
+	var topicDoc = OpenDoc(UrlFromDocID(Int(id)));
+	return (removeAction != undefined && !topicDoc.TopElem.is_archive);
 }
 
 function isAccessToAdd(user_id) {

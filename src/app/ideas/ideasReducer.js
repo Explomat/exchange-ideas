@@ -29,13 +29,20 @@ const ideasReducer = (state = {
 	currentIdea: {},
 	ui: {
 		isLoading: false
+	},
+	meta: {
+		canAdd: true
 	}
 }, action) => {
 	switch(action.type) {
 		case constants.IDEAS_FETCH_SUCCESS: {
 			return {
 				...state,
-				list: action.payload
+				list: action.payload.ideas,
+				meta: {
+					...state.meta,
+					...action.payload.meta
+				}
 			}
 		}
 

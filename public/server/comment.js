@@ -1,3 +1,15 @@
+function _toBoolean(val) {
+	if (val == 'true') {
+		return true;
+	}
+
+	if (val == true) {
+		return true;
+	}
+
+	return false;
+}
+
 function _getModeratorActions(user_id) {
 	var actions = [];
 
@@ -32,11 +44,18 @@ function _setComputedFields(obj, user_id) {
 
 	obj.publish_date = StrXmlDate(Date(obj.publish_date));
 	obj.pict_url = String(authorDoc.TopElem.pict_url);
+	obj.is_archive = _toBoolean(obj.is_archive);
 
 	obj.meta = {
-		isLiked: (l != undefined),
-		canEdit: (Int(obj.author_id) == Int(user_id) || (ArrayOptFind(actions, "This == 'update'") != undefined)),
-		canDelete: (Int(obj.author_id) == Int(user_id) || (ArrayOptFind(actions, "This == 'remove'") != undefined))
+		isLiked: (l != undefined || obj.is_archive),
+		canLike: (!obj.is_archive && Int(obj.author_id) == Int(user_id)),
+		canResponse: !obj.is_archive,
+		canEdit: (
+			(Int(obj.author_id) == Int(user_id) || (ArrayOptFind(actions, "This == 'update'") != undefined)) && !obj.is_archive
+		),
+		canDelete: (
+			(Int(obj.author_id) == Int(user_id) || (ArrayOptFind(actions, "This == 'remove'") != undefined)) && !obj.is_archive
+		)
 	}
 
 	return obj;
@@ -59,6 +78,7 @@ function create(text, author_id, author_fullname, parent_id, idea_id) {
 	}
 	
 	commentDoc.TopElem.idea_id = idea_id;
+	commentDoc.TopElem.is_archive = false;
 	commentDoc.BindToDb();
 	commentDoc.Save();
 	return _setComputedFields(Utils.toJSObject(commentDoc.TopElem), author_id);
@@ -122,6 +142,8 @@ function list(parent_id, idea_id, user_id) {
 	DropFormsCache('x-local://wt/web/vsk/portal/exchange-ideas/server/utils.js');
 
 	if (parent_id != undefined) {
+		var ideaDoc = OpenDoc(UrlFromDocID(Int(idea_id)));
+
 		var l = XQuery("sql: \n\
 			select \n\
 				cceic.* \n\
@@ -135,9 +157,17 @@ function list(parent_id, idea_id, user_id) {
 		for (el in larr) {
 			_setComputedFields(el, user_id);
 		}
-		return larr;
+
+		return {
+			comments: larr,
+			meta: {
+				canAdd: !ideaDoc.TopElem.is_archive
+			}
+		}
 		
 	} else if (idea_id != undefined) {
+		var ideaDoc = OpenDoc(UrlFromDocID(Int(idea_id)));
+		
 		var l = XQuery("sql: \n\
 			select \n\
 				cceic.* \n\
@@ -150,7 +180,13 @@ function list(parent_id, idea_id, user_id) {
 		for (el in larr) {
 			_setComputedFields(el, user_id);
 		}
-		return larr;
+		
+		return {
+			comments: larr,
+			meta: {
+				canAdd: !ideaDoc.TopElem.is_archive
+			}
+		}
 	}
 }
 
@@ -190,22 +226,40 @@ function like(comment_id, user_id) {
 	return _setComputedFields(Utils.toJSObject(commentDoc.TopElem), user_id);
 }
 
+function archive(id, user_id, is_archive) {
+	var Utils = OpenCodeLib('x-local://wt/web/vsk/portal/exchange-ideas/server/utils.js');
+	DropFormsCache('x-local://wt/web/vsk/portal/exchange-ideas/server/utils.js');
+	
+	var commentDoc = OpenDoc(UrlFromDocID(Int(id)));
+	commentDoc.TopElem.is_archive = is_archive;
+	commentDoc.Save();
 
-function isAccessToUpdate(user_id, author_id) {
+	return _setComputedFields(Utils.toJSObject(commentDoc.TopElem), user_id);
+}
+
+function isAccessToLike(id) {
+	var commentDoc = OpenDoc(UrlFromDocID(Int(id)));
+	return !commentDoc.TopElem.is_archive;
+}
+
+function isAccessToUpdate(id, user_id) {
 	var actions = _getModeratorActions(user_id);
 	var updateAction = ArrayOptFind(actions, "This == 'update'");
-	return ((updateAction != undefined) || (Int(author_id) == Int(user_id)));
+	var commentDoc = OpenDoc(UrlFromDocID(Int(id)));
+	return ((updateAction != undefined || Int(commentDoc.TopElem.author_id) == Int(user_id)) && !commentDoc.TopElem.is_archive);
 }
 
-function isAccessToRemove(user_id, author_id) {
+function isAccessToRemove(id, user_id) {
 	var actions = _getModeratorActions(user_id);
 	var removeAction = ArrayOptFind(actions, "This == 'remove'");
-	return ((removeAction != undefined) || (Int(author_id) == Int(user_id)));
+	var commentDoc = OpenDoc(UrlFromDocID(Int(id)));
+	return ((removeAction != undefined || Int(commentDoc.TopElem.author_id) == Int(user_id)) && !commentDoc.TopElem.is_archive);
 }
 
-function isAccessToAdd(user_id) {
+function isAccessToAdd(idea_id) {
 	/*var actions = _getModeratorActions(user_id);
 	var addAction = ArrayOptFind(actions, "This == 'add'");
 	return (addAction != undefined);*/
-	return true;
+	var ideaDoc = OpenDoc(UrlFromDocID(Int(idea_id)));
+	return !ideaDoc.TopElem.is_archive;
 }

@@ -12,7 +12,8 @@ export const constants = {
 		'TOPICS_ADD'
 	]),
 	'TOPICS_LOADING': 'TOPICS_LOADING',
-	'TOPICS_CHANGE': 'TOPICS_CHANGE'
+	'TOPICS_CHANGE': 'TOPICS_CHANGE',
+	'TOPICS_CHANGE_META': 'TOPICS_CHANGE_META'
 };
 
 export function loading(isLoading){
@@ -25,6 +26,15 @@ export function loading(isLoading){
 export function onChange(data) {
 	return {
 		type: constants.TOPICS_CHANGE,
+		payload: {
+			data
+		}
+	}
+}
+
+export function onChangeMeta(data) {
+	return {
+		type: constants.TOPICS_CHANGE_META,
 		payload: {
 			data
 		}
@@ -108,6 +118,32 @@ export function rateTopic(id, value){
 	}
 };
 
+export function archiveTopic(id, is_archive){
+	return dispatch => {
+		request('TopicsArchive')
+			.post({
+				id,
+				is_archive
+			})
+			.then(r => r.json())
+			.then(d => {
+				if (d.type === 'error'){
+					throw d;
+				}
+				dispatch({
+					type: constants.TOPICS_CHANGE,
+					payload: {
+						data: d.data
+					}
+				});
+			})
+			.catch(e => {
+				console.error(e);
+				dispatch(error(e.message));
+			});
+	}
+};
+
 export function saveTopic(id){
 	return (dispatch, getState) => {
 		const st = getState();
@@ -122,8 +158,10 @@ export function saveTopic(id){
 					throw d;
 				}
 				dispatch({
-					type: constants.TOPICS_EDIT_SUCCESS,
-					payload: d.data
+					type: constants.TOPICS_CHANGE,
+					payload: {
+						data: d.data
+					}
 				});
 			})
 			.catch(e => {

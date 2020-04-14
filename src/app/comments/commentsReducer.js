@@ -37,14 +37,21 @@ const commentsReducer = (state = {
 	list: [],
 	ui: {
 		isLoading: false
+	},
+	meta: {
+		canAdd: true
 	}
 }, action) => {
 	switch(action.type) {
 		case constants.COMMENTS_FETCH_SUCCESS: {
-			const { comments } = action.payload;
+			const { comments, meta } = action.payload;
 			return {
 				...state,
-				list: comments
+				list: comments,
+				meta: {
+					...state.meta,
+					...meta
+				}
 			}
 		}
 

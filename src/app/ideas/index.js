@@ -73,7 +73,7 @@ class Ideas extends Component {
 	}
 
 	render() {
-		const { ideas, match, removeIdea, rateIdea } = this.props;
+		const { meta, ideas, match, removeIdea, rateIdea } = this.props;
 		const { addTextTitle, addTextDescription } = this.state;
 
 		return (
@@ -98,7 +98,11 @@ class Ideas extends Component {
 								{item.meta.canDelete &&
 									<Tooltip title='Удалить'>
 										<span>
-											<IconText type='delete' className='ideas__idea-list_footer_delete' onClick={(() => removeIdea(item.id))}/>
+											<IconText type='delete' className='ideas__idea-list_footer_delete' onClick={() => {
+												if (window.confirm(`Вы действительно хотите удалить идею "${item.title} ?"`)) {
+													removeIdea(item.id);
+												}
+											}}/>
 										</span>
 									</Tooltip>
 								}
@@ -110,7 +114,7 @@ class Ideas extends Component {
 					);
 				})}
 
-				<div className='ideas__new'>
+				{meta.canAdd && <div className='ideas__new'>
 					<h4>Добавить новую идею</h4>
 					<div>
 						<Input name='title' className='ideas__new_title' value={addTextTitle} placeholder='Название' onChange={this.handleChangeAddTitle}/>
@@ -118,7 +122,7 @@ class Ideas extends Component {
 						{/*<UploadButton accept='image/x-png,image/gif,image/jpeg'/>*/}
 						<Button type='submit' disabled={!(addTextTitle.trim() && addTextDescription.trim())} onClick={this.handleAdd}>Добавить</Button>
 					</div>
-				</div>
+				</div>}
 			</div>
 		);
 	}
@@ -126,7 +130,8 @@ class Ideas extends Component {
 
 function mapStateToProps(state){
 	return {
-		ideas: state.ideas.list
+		ideas: state.ideas.list,
+		meta: state.ideas.meta
 	}
 }
 
