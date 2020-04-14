@@ -156,10 +156,14 @@ export function getTopic(id) {
 	}
 }
 
-export function getTopics(){
+export function getTopics(search = '', status = '', page = 1){
 	return (dispatch, getState) => {
 		request('Topics')
-			.get()
+			.get({
+				search,
+				status,
+				page
+			})
 			.then(r => r.json())
 			.then(d => {
 				if (d.type === 'error'){

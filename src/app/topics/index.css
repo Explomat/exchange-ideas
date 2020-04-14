@@ -55,7 +55,6 @@
     border-radius: 4px;
     font-size: 18px;
     line-height: 28px;
-    margin-top: 20px;
 }
 
 .topics__new {
@@ -70,12 +69,17 @@
 	margin-bottom: 4px !important;
 }
 
+.topics__filters {
+    width: 97%;
+    margin-bottom: 20px;
+}
+
 .topics__topic-list {
 	position: relative;
     border: 1px solid #ccc;
     padding: 1px;
     border-radius: 4px;
-    width: 47%;
+    width: 48%;
     height: 360px;
     margin: 0 10px 20px 0;
     display: inline-block;
@@ -117,6 +121,7 @@
     word-break: break-word;
     overflow: hidden;
     line-height: 23px;
+    font-size: 16px;
 }
 
 .topics__topic-list_header-link {
@@ -135,4 +140,19 @@
 
 .upload-file {
 	margin-bottom: 4px;
+}
+
+.topics__filters_search {
+    width: 250px !important;
+    margin-right: 20px !important;
+}
+
+.topics__topic-list_status {
+    position: absolute;
+    left: 12px;
+    top: 12px;
+}
+
+.topics__filters_status {
+    width: 150px;
 }

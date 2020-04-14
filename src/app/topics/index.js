@@ -1,12 +1,13 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { Icon, Card, Input, Button, Tooltip, Skeleton } from 'antd';
+import { Icon, Card, Input, Button, Tooltip, Select, Tag, Pagination } from 'antd';
 //import Rate from '../components/rate';
 import IconText from '../components/iconText';
 import UploadFile from  '../components/uploadFile';
 import { createBaseUrl } from '../../utils/request';
 import { Link } from 'react-router-dom';
 import { getTopics, removeTopic, newTopic, rateTopic } from './topicsActions';
+import toBoolean from '../../utils/toBoolean';
 import unnamedImage from '../../images/unnamed_image.png';
 import './index.css';
 
@@ -22,6 +23,10 @@ class Topics extends Component {
 		this.handleRemoveFile = this.handleRemoveFile.bind(this);
 
 		this.state = {
+			searchText: '',
+			searchStatus: '',
+			page: 1,
+			pageSize: 1,
 			addTextTitle: '',
 			addTextDescription: '',
 			addFile: null,
@@ -86,13 +91,37 @@ class Topics extends Component {
 	}
 
 	render() {
-		const { meta, topics, removeTopic } = this.props;
+		const { meta, topics, getTopics, removeTopic } = this.props;
 		const { addTextTitle, addTextDescription, addFile, isAddFileUploaded } = this.state;
 
 		return (
 			<div className='topics-container'>
 				<h1 className='topics-container__title'>Биржа идей</h1>
 				<div className='topics'>
+					<div className='topics__filters'>
+						<Input
+							className='topics__filters_search'
+							
+							placeholder='Поиск'
+							prefix={<Icon type='search' style={{ color: 'rgba(0,0,0,.25)' }} />}
+							onPressEnter={() => getTopics(this.state.searchText, this.state.searchStatus, this.state.page)}
+							onChange={e => this.setState({ searchText: e.target.value })}
+						/>
+						<Select
+							className='topics__filters_status'
+							defaultValue='all'
+							onSelect={(val) => {
+								this.setState({
+									searchStatus: val
+								});
+								getTopics(this.state.searchText, val, this.state.page);
+							}}
+						>
+							<Select.Option value='all'>Все темы</Select.Option>
+							<Select.Option value='active'>Активные</Select.Option>
+							<Select.Option value='archive'>Архивные</Select.Option>
+						</Select>
+					</div>
 					{topics.map(item => {
 						const descr = item.description.length > 200 ? item.description.substring(0, 200) + '...' : item.description;
 						return (
@@ -102,6 +131,7 @@ class Topics extends Component {
 										<img className='topics__topic-list_image' src={`/download_file.html?file_id=${item.image_id}`} />
 										: <img className='topics__topic-list_image' src={unnamedImage} />
 									}
+									{toBoolean(item.is_archive) && <Tag className='topics__topic-list_status' color='#f50'>В архиве</Tag>}
 									<div className='topics__topic-list_header'>
 										<span>{item.title}</span>
 										{/*<span className='topics__topic-list_body_pubish-date'>{item.publish_date}</span>*/}
@@ -132,6 +162,19 @@ class Topics extends Component {
 						);
 					})}
 				</div>
+				<Pagination
+					defaultCurrent={1}
+					current={meta.page}
+					pageSize={meta.pageSize}
+					total={meta.total}
+					onChange={(page, pageSize) => {
+						this.setState({
+							page,
+							pageSize
+						});
+						getTopics(this.state.searchText, this.state.searchStatus, page);
+					}}
+				/>
 				{meta.canAdd && <div className='topics__new'>
 					<h4>Добавить новую тему</h4>
 					<Input name='title' className='topics__new_title' value={addTextTitle} placeholder='Название' onChange={this.handleChangeAddTitle}/>

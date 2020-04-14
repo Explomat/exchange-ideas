@@ -53,6 +53,7 @@ function create(title, description, image_id, author_id, author_fullname) {
 	topicDoc.TopElem.publish_date = new Date();
 	topicDoc.TopElem.author_id = author_id;
 	topicDoc.TopElem.author_fullname = author_fullname;
+	topicDoc.TopElem.is_archive = false;
 
 	topicDoc.BindToDb();
 	topicDoc.Save();
@@ -109,24 +110,60 @@ function remove(id) {
 	DeleteDoc(UrlFromDocID(Int(id)));
 }
 
-function list(id, user_id) {
+function list(id, user_id, search, status, minRow, maxRow, pageSize) {
 	var Utils = OpenCodeLib('x-local://wt/web/vsk/portal/exchange-ideas/server/utils.js');
 	DropFormsCache('x-local://wt/web/vsk/portal/exchange-ideas/server/utils.js');
 
 	if (id == undefined) {
+		var st = 3;
+		if (status == 'active') {
+			st = 0;
+		} else if (status == 'archive') {
+			st = 1;
+		}
+
 		var l = XQuery("sql: \n\
-			select \n\
-				cceit.*, \n\
-				(select count(id) from cc_exchange_ideas_ideas where topic_id = cceit.id) ideas_count \n\
-			from \n\
-				cc_exchange_ideas_topics cceit \n\
-		");
+			declare @s varchar(max) = '" + search + "'; \n\
+			declare @status int = " + st + " \n\
+			select d.* \n\
+			from ( \n\
+				select \n\
+					count(cceit.id) over() total, \n\
+					cceit.*, \n\
+					(select count(id) from cc_exchange_ideas_ideas where topic_id = cceit.id) ideas_count, \n\
+					row_number() over (order by cceit.rate) as [row_number] \n\
+				from \n\
+					cc_exchange_ideas_topics cceit \n\
+				where \n\
+					cceit.title like '%'+@s+'%' \n\
+					and (cceit.is_archive = @status or @status = 3) \n\
+			) d \n\
+			where \n\
+				d.[row_number] > " + minRow + " and d.[row_number] <= " + maxRow + " \n\
+			order by d.rate asc"
+		);
 
 		var larr = Utils.toJSArray(l);
 		for (el in larr) {
 			_setComputedFields(el, user_id);
 		}
-		return larr;
+
+		var total = 0;
+		var fobj = ArrayOptFirstElem(l);
+		if (fobj != undefined) {
+			total = fobj.total;
+		}
+
+		var actions = _getModeratorActions(user_id);
+		var obj = {
+			meta: {
+				total: Int(total),
+				pageSize: pageSize,
+				canAdd: (ArrayOptFind(actions, "This == 'add'") != undefined)
+			},
+			topics: larr
+		}
+		return obj;
 	}
 
 	var el = ArrayOptFirstElem(
@@ -139,7 +176,11 @@ function list(id, user_id) {
 			cceit.id = " + id)
 	);
 
-	return _setComputedFields(Utils.toJSObject(el), user_id);
+	var lobj = _setComputedFields(Utils.toJSObject(el), user_id);
+	return {
+		topics: lobj,
+		meta: {}
+	}
 }
 
 function rate(id, user_id, value) {

@@ -17,22 +17,22 @@ DropFormsCache('x-local://wt/web/vsk/portal/exchange-ideas/server/utils.js');
 
 function get_Topics(queryObjects) {
 	var topicId = queryObjects.GetOptProperty('id');
-	var topics = [];
+	var search = queryObjects.HasProperty('search') ? queryObjects.search : '';
+	var status = queryObjects.HasProperty('status') ? queryObjects.status : '';
+	var page = queryObjects.HasProperty('page') ? OptInt(queryObjects.page) : 1;
+	var pageSize = 5;
+
+	var min = (page - 1) * pageSize;
+	var max = min + pageSize;
+	var topicsObj = {};
 
 	try {
-		topics = Topics.list(topicId, curUserID);
+		topicsObj = Topics.list(topicId, curUserID, search, status, min, max, pageSize);
 	} catch(e) {
 		return Utils.setError(e);
 	}
-	
-	var actions = Utils.getModeratorActions(curUserID, 'cc_exchange_ideas_topic');
 
-	return Utils.setSuccess({
-		topics: topics,
-		meta: {
-			canAdd: (ArrayOptFind(actions, "This == 'add'") != undefined)
-		}
-	});
+	return Utils.setSuccess(topicsObj);
 }
 
 function post_TopicsRate(queryObjects) {
@@ -107,11 +107,7 @@ function post_Topics(queryObjects) {
 		//}
 
 		//alert('update topic: 1');
-		var topicDoc = Topics.update(topicId, {
-			title: title,
-			description: description,
-			image_id: imageId
-		}, curUserID);
+		var topicDoc = Topics.update(topicId, data, curUserID);
 		//alert('update topic: 2');
 		return Utils.setSuccess(topicDoc);
 	} catch(e) {
@@ -192,8 +188,11 @@ function post_Ideas(queryObjects) {
 				resId = resDoc.DocID;
 			}
 
+			//alert('index_postIdeas: 1');
 			var topicDoc = OpenDoc(UrlFromDocID(Int(topicId)));
+			//alert('index_postIdeas: 2');
 			var ideaDoc = Ideas.create(title, description, resId, curUserID, userDoc.TopElem.fullname, topicId, topicDoc.TopElem.title);
+			//alert('index_postIdeas: 3');
 			return Utils.setSuccess(ideaDoc);
 		} catch(e) {
 			return Utils.setError(e);
@@ -235,15 +234,23 @@ function delete_Ideas(queryObjects) {
 	var data = tools.read_object(queryObjects.Body);
 	var ideaId = data.GetOptProperty('id');
 
+	alert('ideaId: ' + ideaId);
+
 	if (ideaId != undefined) {
 		try {
+			alert('index_delete_Ideas: 1');
 			var ideaDoc = OpenDoc(UrlFromDocID(Int(ideaId)));
+			alert('index_delete_Ideas: 2');
 
 			if (!Ideas.isAccessToRemove(curUserID, ideaDoc.TopElem.author_id)) {
 				return Utils.setError('У вас нет прав на удаление');
 			}
 
+			alert('index_delete_Ideas: 3');
+
 			Ideas.remove(ideaId);
+
+			alert('index_delete_Ideas: 4');
 			return Utils.setSuccess();
 		} catch(e) {
 			return Utils.setError(e);

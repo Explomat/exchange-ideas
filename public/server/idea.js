@@ -102,7 +102,7 @@ function remove(id) {
 
 	var ideaDoc = OpenDoc(UrlFromDocID(Int(id)));
 	var resId = ideaDoc.TopElem.image_id;
-	if (resId != null && resId != undefined) {
+	if (resId != null && resId != undefined && resId != '') {
 		DeleteDoc(UrlFromDocID(resId));
 	}
 	DeleteDoc(UrlFromDocID(Int(id)));

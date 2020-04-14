@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { PageHeader, Icon, Card, Input, Button, Tooltip } from 'antd';
+import { PageHeader, Icon, Card, Input, Button, Tooltip, Tag } from 'antd';
 import UploadFile from  '../components/uploadFile';
 import { createBaseUrl } from '../../utils/request';
+import toBoolean from '../../utils/toBoolean';
 import Ideas from '../ideas';
 import { getTopic, saveTopic, onChange } from './topicsActions';
 import './index.css';
@@ -16,6 +17,7 @@ class Topic extends Component {
 		this.handleToggleEdit = this.handleToggleEdit.bind(this);
 		this.handleChangeTitle = this.handleChangeTitle.bind(this);
 		this.handleChangeDescription = this.handleChangeDescription.bind(this);
+		this.handleChangeStatus = this.handleChangeStatus.bind(this);
 		this.handleSave = this.handleSave.bind(this);
 		this.handleUploadFile = this.handleUploadFile.bind(this);
 		this.handleRemoveFile = this.handleRemoveFile.bind(this);
@@ -66,6 +68,16 @@ class Topic extends Component {
 		onChange({
 			description: e.target.value
 		});
+	}
+
+	handleChangeStatus() {
+		const { topic, onChange, saveTopic } = this.props;
+
+		onChange({
+			is_archive: true
+		});
+
+		saveTopic(topic.id);
 	}
 
 	handleSave() {
@@ -134,7 +146,10 @@ class Topic extends Component {
 										<span className='topic__header_author-fullname'>
 											{topic.author_fullname}
 										</span>
-										{/*<span className='topic__header_publish-date'>{topic.publish_date}</span>*/}
+										{toBoolean(topic.is_archive) ?
+											<Tag className='topic__body_status' color='orange'>В архиве</Tag>
+											: (topic.meta && topic.meta.canEdit && <Button type='primary' size='small' onClick={this.handleChangeStatus}>Переместить в архив</Button>)
+										}
 									</span>
 								}
 								extra={

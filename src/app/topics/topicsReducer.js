@@ -31,7 +31,10 @@ const topicsReducer = (state = {
 		isLoading: false
 	},
 	meta: {
-		canAdd: false
+		canAdd: false,
+		page: 1,
+		pageSize: 1,
+		total: 1
 	},
 }, action) => {
 	switch(action.type) {
