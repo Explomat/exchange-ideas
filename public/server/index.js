@@ -20,14 +20,16 @@ function get_Topics(queryObjects) {
 	var search = queryObjects.HasProperty('search') ? queryObjects.search : '';
 	var status = queryObjects.HasProperty('status') ? queryObjects.status : '';
 	var page = queryObjects.HasProperty('page') ? OptInt(queryObjects.page) : 1;
-	var pageSize = 2;
+	var sort = queryObjects.HasProperty('sort') ? String(queryObjects.sort) : 'rate';
+	var sortDirection = queryObjects.HasProperty('sort_direction') ? String(queryObjects.sort_direction) : 'asc';
+	var pageSize = 4;
 
 	var min = (page - 1) * pageSize;
 	var max = min + pageSize;
 	var topicsObj = {};
 
 	try {
-		topicsObj = Topics.list(topicId, curUserID, search, status, min, max, pageSize);
+		topicsObj = Topics.list(topicId, curUserID, search, status, min, max, pageSize, sort, sortDirection);
 	} catch(e) {
 		return Utils.setError(e);
 	}

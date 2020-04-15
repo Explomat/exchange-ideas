@@ -32,6 +32,8 @@ const topicsReducer = (state = {
 	},
 	meta: {
 		canAdd: false,
+		sort: 'publish_date',
+		sortDirection: 'desc',
 		page: 1,
 		pageSize: 1,
 		total: 1,

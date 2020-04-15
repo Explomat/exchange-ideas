@@ -107,7 +107,7 @@ class Topic extends Component {
 		);*/
 
 		return (
-			<Card className='topic'>
+			<div className='topic'>
 				<div className='topic__header'>
 					{/*<span className='topic__header_author-fullname'>
 						{topic.author_fullname}
@@ -187,7 +187,7 @@ class Topic extends Component {
 				<div className='topic__footer'>
 					<Ideas/>
 				</div>
-			</Card>
+			</div>
 		);
 	}
 }

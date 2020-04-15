@@ -124,7 +124,7 @@ function remove(id) {
 	DeleteDoc(UrlFromDocID(Int(id)));
 }
 
-function list(id, user_id, search, status, minRow, maxRow, pageSize) {
+function list(id, user_id, search, status, minRow, maxRow, pageSize, sort, sortDirection) {
 	var Utils = OpenCodeLib('x-local://wt/web/vsk/portal/exchange-ideas/server/utils.js');
 	DropFormsCache('x-local://wt/web/vsk/portal/exchange-ideas/server/utils.js');
 
@@ -142,19 +142,23 @@ function list(id, user_id, search, status, minRow, maxRow, pageSize) {
 			select d.* \n\
 			from ( \n\
 				select \n\
-					count(cceit.id) over() total, \n\
-					cceit.*, \n\
-					(select count(id) from cc_exchange_ideas_ideas where topic_id = cceit.id) ideas_count, \n\
-					row_number() over (order by cceit.rate) as [row_number] \n\
-				from \n\
-					cc_exchange_ideas_topics cceit \n\
-				where \n\
-					cceit.title like '%'+@s+'%' \n\
-					and (cceit.is_archive = @status or @status = 3) \n\
+					c.*, \n\
+					row_number() over (order by c." + sort + " " + sortDirection + ") as [row_number] \n\
+				from ( \n\
+					select \n\
+						count(cceit.id) over() total, \n\
+						cceit.*, \n\
+						(select count(id) from cc_exchange_ideas_ideas where topic_id = cceit.id) ideas_count \n\
+					from \n\
+						cc_exchange_ideas_topics cceit \n\
+					where \n\
+						cceit.title like '%'+@s+'%' \n\
+						and (cceit.is_archive = @status or @status = 3) \n\
+				) c \n\
 			) d \n\
 			where \n\
 				d.[row_number] > " + minRow + " and d.[row_number] <= " + maxRow + " \n\
-			order by d.rate asc"
+			order by d." + sort + " " + sortDirection
 		);
 
 		var larr = Utils.toJSArray(l);

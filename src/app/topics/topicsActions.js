@@ -194,13 +194,18 @@ export function getTopic(id) {
 	}
 }
 
-export function getTopics(search = '', status = '', page = 1){
+export function getTopics(){
 	return (dispatch, getState) => {
+
+		const meta = getState().topics.meta;
+
 		request('Topics')
 			.get({
-				search,
-				status,
-				page
+				search: meta.searchText,
+				status: meta.statusText,
+				page: meta.page,
+				sort: meta.sort,
+				sort_direction: meta.sortDirection
 			})
 			.then(r => r.json())
 			.then(d => {

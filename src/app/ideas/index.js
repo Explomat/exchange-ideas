@@ -78,6 +78,7 @@ class Ideas extends Component {
 
 		return (
 			<div className='ideas'>
+				<h4 className='ideas__title'>Идеи {ideas.length}</h4>
 				{ideas.map(item => {
 					return (
 						<div key={item.id} className='ideas__idea-list'>

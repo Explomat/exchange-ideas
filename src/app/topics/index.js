@@ -25,6 +25,7 @@ class Topics extends Component {
 		this.handleChangeStatusText = this.handleChangeStatusText.bind(this);
 		this.handleChangePagination = this.handleChangePagination.bind(this);
 		this.handleSearch = this.handleSearch.bind(this);
+		this.handleChangeSort = this.handleChangeSort.bind(this);
 
 		this.state = {
 			addTextTitle: '',
@@ -37,13 +38,26 @@ class Topics extends Component {
 
 	componentDidMount(){
 		const { meta } = this.props;
-		this.props.getTopics(meta.searchText, meta.statusText, meta.page);
+		this.props.getTopics(meta.searchText, meta.statusText, meta.page, meta.sort, meta.sortDirection);
+	}
+
+	handleChangeSort(val) {
+		const { onChangeMeta, getTopics, meta } = this.props;
+		const [ sort, sortDirection ] = val.split(':');
+
+		onChangeMeta({
+			sort,
+			sortDirection
+		});
+
+		getTopics(meta.searchText, meta.statusText, 1, sort, sortDirection);
 	}
 
 	handleChangeSearchText(e) {
-		const { onChangeMeta, getTopics, meta } = this.props;
+		const { onChangeMeta, meta } = this.props;
 		onChangeMeta({
-			searchText: e.target.value
+			searchText: e.target.value,
+			page: 1
 		});
 	}
 
@@ -54,7 +68,7 @@ class Topics extends Component {
 			page: 1
 		});
 
-		getTopics(meta.searchText, statusText, 1);
+		getTopics(meta.searchText, statusText, 1, meta.sort, meta.sortDirection);
 	}
 
 	handleChangePagination(page, pageSize) {
@@ -64,7 +78,7 @@ class Topics extends Component {
 			pageSize
 		});
 
-		getTopics(meta.searchText, meta.statusText, page);
+		getTopics(meta.searchText, meta.statusText, page, meta.sort, meta.sortDirection);
 	}
 
 	handleSearch(val) {
@@ -73,7 +87,7 @@ class Topics extends Component {
 			page: 1
 		});
 
-		getTopics(meta.searchText, meta.statusText, 1);
+		getTopics(meta.searchText, meta.statusText, 1, meta.sort, meta.sortDirection);
 	}
 
 	handleUploadFile(f) {
@@ -127,7 +141,7 @@ class Topics extends Component {
 	}
 
 	render() {
-		const { meta, topics, getTopics, removeTopic } = this.props;
+		const { meta, topics, removeTopic } = this.props;
 		const { addTextTitle, addTextDescription, addFile, isAddFileUploaded } = this.state;
 
 		return (
@@ -137,11 +151,11 @@ class Topics extends Component {
 					<div className='topics__filters'>
 						<Input
 							className='topics__filters_search'
-							
 							placeholder='Поиск'
 							prefix={<Icon type='search' style={{ color: 'rgba(0,0,0,.25)' }} />}
 							onPressEnter={this.handleSearch}
 							onChange={this.handleChangeSearchText}
+							value={meta.searchText}
 						/>
 						<Select
 							className='topics__filters_status'
@@ -152,12 +166,25 @@ class Topics extends Component {
 							<Select.Option value='active'>Активные</Select.Option>
 							<Select.Option value='archive'>Архивные</Select.Option>
 						</Select>
+						<Select
+							className='topics__filters_sort'
+							value={`${meta.sort}:${meta.sortDirection}`}
+							onSelect={this.handleChangeSort}
+						>
+							<Select.Option value='title:asc'>По названию +</Select.Option>
+							<Select.Option value='title:desc'>По названию -</Select.Option>
+							<Select.Option value='publish_date:asc'>По дате +</Select.Option>
+							<Select.Option value='publish_date:desc'>По дате -</Select.Option>
+							<Select.Option value='ideas_count:asc'>По количеству идей +</Select.Option>
+							<Select.Option value='ideas_count:desc'>По количеству идей -</Select.Option>
+						</Select>
 					</div>
 					{topics.map(item => {
 						const descr = item.description.length > 200 ? item.description.substring(0, 200) + '...' : item.description;
 						return (
 							<div key={item.id} className='topics__topic-list'>
 								<Link to={`/topics/${item.id}`}>
+									<span className='topics__topic-list_body_pubish-date'>{new Date(item.publish_date).toLocaleDateString()}</span>
 									{item.image_id ?
 										<img className='topics__topic-list_image' src={`/download_file.html?file_id=${item.image_id}`} />
 										: <img className='topics__topic-list_image' src={unnamedImage} />
@@ -165,7 +192,6 @@ class Topics extends Component {
 									{toBoolean(item.is_archive) && <Tag className='topics__topic-list_status' color='#f50'>В архиве</Tag>}
 									<div className='topics__topic-list_header'>
 										<span>{item.title}</span>
-										{/*<span className='topics__topic-list_body_pubish-date'>{item.publish_date}</span>*/}
 									</div>
 								</Link>
 								<div className='topics__topic-list_body'>

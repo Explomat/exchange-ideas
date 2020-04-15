@@ -1,3 +1,7 @@
+.topic {
+    padding: 24px;
+}
+
 .topics {
     margin-top: 30px;
 }
@@ -10,6 +14,7 @@
 .topic__image {
 	width: 100%;
 	max-height: 500px;
+    margin-bottom: 20px;
 }
 
 .topics-container {
@@ -104,9 +109,11 @@
 }
 
 .topics__topic-list_body_pubish-date {
-	float: right;
 	font-size: 12px;
 	color: #444444b3;
+    position: absolute;
+    right: 12px;
+    top: 12px;
 }
 
 .topics__topic-list_footer {
@@ -161,4 +168,9 @@
 
 .topics__filters_status {
     width: 150px;
+    margin-right: 20px !important;
+}
+
+.topics__filters_sort {
+    width: 200px;
 }
