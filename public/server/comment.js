@@ -48,7 +48,7 @@ function _setComputedFields(obj, user_id) {
 
 	obj.meta = {
 		isLiked: (l != undefined || obj.is_archive),
-		canLike: (!obj.is_archive && Int(obj.author_id) == Int(user_id)),
+		canLike: !obj.is_archive,
 		canResponse: !obj.is_archive,
 		canEdit: (
 			(Int(obj.author_id) == Int(user_id) || (ArrayOptFind(actions, "This == 'update'") != undefined)) && !obj.is_archive

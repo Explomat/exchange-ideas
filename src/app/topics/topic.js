@@ -5,7 +5,7 @@ import UploadFile from  '../components/uploadFile';
 import { createBaseUrl } from '../../utils/request';
 import toBoolean from '../../utils/toBoolean';
 import Ideas from '../ideas';
-import { getTopic, saveTopic, archiveTopic, onChange } from './topicsActions';
+import { getTopic, saveTopic, archiveTopic, onChange, onResetEdit } from './topicsActions';
 import './index.css';
 
 
@@ -21,6 +21,7 @@ class Topic extends Component {
 		this.handleSave = this.handleSave.bind(this);
 		this.handleUploadFile = this.handleUploadFile.bind(this);
 		this.handleRemoveFile = this.handleRemoveFile.bind(this);
+		this.handleCancelEdit = this.handleCancelEdit.bind(this);
 
 		this.state = {
 			isEdit: false
@@ -30,6 +31,13 @@ class Topic extends Component {
 	componentDidMount(){
 		const { getTopic, match } = this.props;
 		getTopic(match.params.id);
+	}
+
+	handleCancelEdit() {
+		const { onResetEdit } = this.props;
+		onResetEdit();
+
+		this.handleToggleEdit();
 	}
 
 	handleUploadFile(f) {
@@ -86,25 +94,6 @@ class Topic extends Component {
 	render() {
 		const { topic, history } = this.props;
 		const { isEdit } = this.state;
-		//console.log((!!topic.image_id || isAddFileUploaded));
-
-		/*return (
-			<Card
-				className='topic'
-				actions={[
-					(!isEdit && (topic.meta && topic.meta.canEdit) && <a key='list-edit' onClick={this.handleToggleEdit}>edit</a>),
-					(isEdit && <a key='list-save' onClick={this.handleSave}>save</a>),
-				]}
-			>
-				<div>Автор: {topic.author_fullname}</div> 
-				{isEdit ? <Input value={topic.title} onChange={this.handleChangeTitle} /> : <div>Название: {topic.title}</div>}
-				{isEdit ? <Input.TextArea value={topic.description} onChange={this.handleChangeDescription} /> : <div>Описание: {topic.description}</div>}
-				<div>Дата публикации: {topic.publish_date}</div>
-
-				<h3>Идеи</h3>
-				<Ideas/>
-			</Card>
-		);*/
 
 		return (
 			<div className='topic'>
@@ -118,10 +107,12 @@ class Topic extends Component {
 				</div>
 				<div className='topic__body'>
 					{isEdit ? (
-						<div>
-							<Input value={topic.title} onChange={this.handleChangeTitle} />
-							<Input.TextArea value={topic.description} onChange={this.handleChangeDescription} />
+						<div className='topic__body_edit'>
+							<h3>Редактирование</h3>
+							<Input className='topic__body_edit_title' value={topic.title} onChange={this.handleChangeTitle} />
+							<Input.TextArea autoSize={{ minRows: 2, maxRows: 6 }} className='topic__body_edit_description' value={topic.description} onChange={this.handleChangeDescription} />
 							<UploadFile
+								className='topic__body_edit_file'
 								url={createBaseUrl('File')}
 								accept='image/x-png,image/gif,image/jpeg'
 								disabled={!!topic.image_id}
@@ -129,7 +120,12 @@ class Topic extends Component {
 								onSuccess={this.handleUploadFile}
 								onRemove={this.handleRemoveFile}
 							/>
-							<Button key='save-edit' type='primary' size='small' className='topic__header_save-button' onClick={this.handleSave}>Сохранить</Button>
+
+							<div className='topic__header_buttons'>
+								<Button size='small' className='topic__header_cancel-button' onClick={this.handleCancelEdit}>Отмена</Button>
+								<Button disabled={topic.title.trim() === '' || topic.description.trim() === ''} type='primary' size='small' className='topic__header_save-button' onClick={this.handleSave}>Сохранить</Button>
+							</div>
+							<div className='clearfix' />
 						</div>
 					) : (
 						<div>
@@ -138,8 +134,11 @@ class Topic extends Component {
 								title={<h3 className='topic__body_title'>{topic.title}</h3>}
 								subTitle={
 									<span>
-										<span className='topic__header_author-fullname'>
-											{topic.author_fullname}
+										<span className='topic__header_container'>
+											<span className='topic__header_author-fullname'>
+												{topic.author_fullname}
+											</span>
+											<span className='topic__header_publish-date'>{new Date(topic.publish_date).toLocaleDateString()}</span>
 										</span>
 										{toBoolean(topic.is_archive) ?
 											(
@@ -160,29 +159,6 @@ class Topic extends Component {
 							<div className='topic__body_description'>{topic.description}</div>
 						</div>
 					)}
-
-					{/*{isEdit ?
-						<Input value={topic.title} onChange={this.handleChangeTitle} /> :
-						(
-							<PageHeader
-								onBack={history.goBack}
-								title={<h3 className='topic__body_title'>{topic.title}</h3>}
-								subTitle={
-									<span>
-										<span className='topic__header_author-fullname'>
-											{topic.author_fullname}
-										</span>
-										<span className='topic__header_publish-date'>{topic.publish_date}</span>
-									</span>
-								}
-								extra={
-									(!isEdit && (topic.meta && topic.meta.canEdit) && <Tooltip title='Реактировать'><Icon type='edit' onClick={this.handleToggleEdit} /></Tooltip>)
-								}
-							/>
-					)}
-					{topic.image_id && <img className='topic__image' src={`/download_file.html?file_id=${topic.image_id}`} />}
-					{isEdit ? <Input.TextArea value={topic.description} onChange={this.handleChangeDescription} /> : <div className='topic__body_description'>{topic.description}</div>}
-					{isEdit && <Button key='save-edit' type='primary' size='small' className='topic__header_save-button' onClick={this.handleSave}>Сохранить</Button>}*/}
 				</div>
 				<div className='topic__footer'>
 					<Ideas/>
@@ -198,4 +174,4 @@ function mapStateToProps(state){
 	}
 }
 
-export default connect(mapStateToProps, { getTopic, saveTopic, archiveTopic, onChange })(Topic);
+export default connect(mapStateToProps, { getTopic, saveTopic, archiveTopic, onChange, onResetEdit })(Topic);

@@ -22,7 +22,7 @@
 
 .comment__header {
 	margin-bottom: 8px;
-	background-color: #f5fbe5;
+	background-color: #e6ecf14a;
 }
 
 .comment__avatar {
@@ -56,6 +56,14 @@
 
 .comments__list-title {
 	border-bottom: 1px solid #4444443b;
+}
+
+.comment__buttons {
+	margin-top: 4px;
+}
+
+.comment__buttons > button {
+	margin-right: 8px;
 }
 
 .ant-tree-node-content-wrapper:last-child {

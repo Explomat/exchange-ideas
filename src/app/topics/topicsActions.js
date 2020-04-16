@@ -9,11 +9,13 @@ export const constants = {
 		'TOPIC_FETCH',
 		'TOPICS_EDIT',
 		'TOPICS_REMOVE',
-		'TOPICS_ADD'
+		'TOPICS_ADD',
+		'TOPICS_SAVE'
 	]),
 	'TOPICS_LOADING': 'TOPICS_LOADING',
 	'TOPICS_CHANGE': 'TOPICS_CHANGE',
-	'TOPICS_CHANGE_META': 'TOPICS_CHANGE_META'
+	'TOPICS_CHANGE_META': 'TOPICS_CHANGE_META',
+	'TOPICS_RESET_EDIT': 'TOPICS_RESET_EDIT'
 };
 
 export function loading(isLoading){
@@ -38,6 +40,12 @@ export function onChangeMeta(data) {
 		payload: {
 			data
 		}
+	}
+}
+
+export function onResetEdit() {
+	return {
+		type: constants.TOPICS_RESET_EDIT
 	}
 }
 
@@ -158,10 +166,8 @@ export function saveTopic(id){
 					throw d;
 				}
 				dispatch({
-					type: constants.TOPICS_CHANGE,
-					payload: {
-						data: d.data
-					}
+					type: constants.TOPICS_SAVE_SUCCESS,
+					payload: d.data
 				});
 			})
 			.catch(e => {

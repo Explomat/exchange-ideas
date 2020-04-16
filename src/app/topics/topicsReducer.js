@@ -27,6 +27,7 @@ const listReducer = (state = [], action) => {
 const topicsReducer = (state = {
 	list: [],
 	currentTopic: {},
+	defaultCurrentTopic: {},
 	ui: {
 		isLoading: false
 	},
@@ -56,7 +57,8 @@ const topicsReducer = (state = {
 		case constants.TOPIC_FETCH_SUCCESS: {
 			return {
 				...state,
-				currentTopic: action.payload.topics
+				currentTopic: action.payload.topics,
+				defaultCurrentTopic: action.payload.topics
 			}
 		}
 
@@ -68,6 +70,29 @@ const topicsReducer = (state = {
 				currentTopic: {
 					...state.currentTopic,
 					...data
+				}
+			}
+		}
+
+		case constants.TOPICS_SAVE_SUCCESS: {
+			return {
+				...state,
+				currentTopic: {
+					...state.currentTopic,
+					...action.payload
+				},
+				defaultCurrentTopic: {
+					...state.defaultCurrentTopic,
+					...action.payload
+				}
+			}
+		}
+
+		case constants.TOPICS_RESET_EDIT: {
+			return {
+				...state,
+				currentTopic: {
+					...state.defaultCurrentTopic
 				}
 			}
 		}

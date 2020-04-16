@@ -9,16 +9,24 @@ export const constants = {
 		'IDEA_FETCH',
 		'IDEAS_EDIT',
 		'IDEAS_REMOVE',
-		'IDEAS_ADD'
+		'IDEAS_ADD',
+		'IDEAS_SAVE'
 	]),
 	'IDEAS_LOADING': 'IDEAS_LOADING',
-	'IDEAS_CHANGE': 'IDEAS_CHANGE'
+	'IDEAS_CHANGE': 'IDEAS_CHANGE',
+	'IDEAS_RESET_EDIT': 'IDEAS_RESET_EDIT'
 };
 
 export function onChange(data) {
 	return {
 		type: constants.IDEAS_CHANGE,
 		payload: data
+	}
+}
+
+export function onResetEdit() {
+	return {
+		type: constants.IDEAS_RESET_EDIT
 	}
 }
 
@@ -112,7 +120,7 @@ export function saveIdea(id){
 					throw d;
 				}
 				dispatch({
-					type: constants.IDEAS_EDIT_SUCCESS,
+					type: constants.IDEAS_SAVE_SUCCESS,
 					payload: d.data
 				});
 			})

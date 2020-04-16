@@ -27,6 +27,7 @@ const listReducer = (state = [], action) => {
 const ideasReducer = (state = {
 	list: [],
 	currentIdea: {},
+	defaultCurrentIdea: {},
 	ui: {
 		isLoading: false
 	},
@@ -49,7 +50,8 @@ const ideasReducer = (state = {
 		case constants.IDEA_FETCH_SUCCESS: {
 			return {
 				...state,
-				currentIdea: action.payload
+				currentIdea: action.payload,
+				defaultCurrentIdea: action.payload
 			}
 		}
 
@@ -68,6 +70,29 @@ const ideasReducer = (state = {
 				currentIdea: {
 					...state.currentIdea,
 					...action.payload
+				}
+			}
+		}
+
+		case constants.IDEAS_SAVE_SUCCESS: {
+			return {
+				...state,
+				currentIdea: {
+					...state.currentIdea,
+					...action.payload
+				},
+				defaultCurrentIdea: {
+					...state.currentIdea,
+					...action.payload
+				}
+			}
+		}
+
+		case constants.IDEAS_RESET_EDIT: {
+			return {
+				...state,
+				currentIdea: {
+					...state.defaultCurrentIdea
 				}
 			}
 		}

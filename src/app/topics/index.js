@@ -146,7 +146,7 @@ class Topics extends Component {
 
 		return (
 			<div className='topics-container'>
-				<div className='topics-container__title'>Биржа идей</div>
+				<div className='topics-container__title'>Банк идей</div>
 				<div className='topics'>
 					<div className='topics__filters'>
 						<Input
@@ -184,14 +184,14 @@ class Topics extends Component {
 						return (
 							<div key={item.id} className='topics__topic-list'>
 								<Link to={`/topics/${item.id}`}>
-									<span className='topics__topic-list_body_pubish-date'>{new Date(item.publish_date).toLocaleDateString()}</span>
 									{item.image_id ?
 										<img className='topics__topic-list_image' src={`/download_file.html?file_id=${item.image_id}`} />
 										: <img className='topics__topic-list_image' src={unnamedImage} />
 									}
 									{toBoolean(item.is_archive) && <Tag className='topics__topic-list_status' color='#f50'>В архиве</Tag>}
 									<div className='topics__topic-list_header'>
-										<span>{item.title}</span>
+										<div className='topics__topic-list_body_pubish-date'>{new Date(item.publish_date).toLocaleDateString()}</div>
+										<div className='topics__topic-list_body_title'>{item.title}</div>
 									</div>
 								</Link>
 								<div className='topics__topic-list_body'>

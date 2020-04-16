@@ -105,23 +105,41 @@ class Comment extends Component {
 						<span className='comment__publish-date'>{new Date(publish_date).toLocaleDateString('ru-RU', { hour: 'numeric', minute: 'numeric' })}</span>
 					</span>
 					<span className='comment__header_crud'>
-						{!isEdit && meta.canEdit && <Tooltip title='Удалить'><Icon type='delete' style={{ padding: '10px' }} onClick={this.handleRemove}/></Tooltip>}
-						{!isEdit && meta.canEdit && <Tooltip title='Редактировать'><Icon type='edit'  style={{ padding: '10px' }} onClick={this.handleToggleEdit}/></Tooltip>}
+						{!isNew && !isEdit && meta.canEdit &&
+							<Tooltip title='Удалить'>
+								<Icon type='delete' style={{ padding: '10px' }} onClick={this.handleRemove}/>
+							</Tooltip>
+						}
+						{!isNew && !isEdit && meta.canEdit &&
+							<Tooltip title='Редактировать'>
+								<Icon type='edit'  style={{ padding: '10px' }} onClick={this.handleToggleEdit}/>
+							</Tooltip>
+						}
 					</span>
 				</div>
-				<div>{isEdit && meta.canEdit ? <Input.TextArea value={editText} onChange={this.handleChange}/> : text}</div>
-				{isEdit && <Button type='primary' onClick={this.handleSave}>Сохранить</Button>}
+				{isEdit && meta.canEdit ?
+					<div>
+						<Input.TextArea value={editText} onChange={this.handleChange}/>
+						<div className='comment__buttons'>
+							<Button disabled={editText.trim() === ''} type='primary' size='small' onClick={this.handleSave}>Сохранить</Button>
+							<Button size='small' onClick={this.handleToggleEdit}>Отмена</Button>
+						</div>
+					</div> : <div>{text}</div>
+				}
 				{!isEdit && meta.canResponse && <a onClick={this.handleToggleEditNew}>Ответить</a>}
 				{isNew && 
 					(<div>
 						<Input.TextArea value={newText} onChange={this.handleChangeNew}/>
-						<Button type='primary' onClick={this.handleSaveNew}>Сохранить</Button>
+						<div className='comment__buttons'>
+							<Button disabled={newText.trim() === ''} size='small' type='primary' onClick={this.handleSaveNew}>Сохранить</Button>
+							<Button size='small' onClick={this.handleToggleEditNew}>Отмена</Button>
+						</div>
 					</div>)
 				}
-				<span className='comment__like'>
+				{!isNew && !isEdit && <span className='comment__like'>
 					<Icon type='like' theme={meta.isLiked ? 'twoTone' : ''} twoToneColor={meta.isLiked ? '#23de21' : ''} style={{ marginRight: 8 }} onClick={this.handleLike}/>
 					{likes}
-				</span>
+				</span>}
 			</div>
 		);
 	}
