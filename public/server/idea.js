@@ -31,21 +31,21 @@ function _getModeratorActions(user_id) {
 
 function _setComputedFields(obj, user_id) {
 	var l = ArrayOptFirstElem(XQuery("sql: \n\
-		select id \n\
-		from cc_exchange_ideas_ratings \n\
-		where \n\
-			object_type = 'cc_exchange_ideas_idea' \n\
-			and object_id = " + obj.id + " \n\
-			and user_id = " + user_id + " \n\
-	"));
+		select \n\
+			cceit.image_id topic_image_id \n\
+		from cc_exchange_ideas_ideas cceii \n\
+		inner join cc_exchange_ideas_topics cceit on cceit.id = cceii.topic_id \n\
+		where cceii.id = " + obj.id)
+	);
 
 	var actions = _getModeratorActions(user_id);
 
 	obj.publish_date = StrXmlDate(DateNewTime(Date(obj.publish_date)));
 	obj.is_archive = _toBoolean(obj.is_archive);
+	obj.topic_image_id = (l != undefined ? String(l.topic_image_id) : '');
 
 	obj.meta = {
-		isRated: (l != undefined || obj.is_archive),
+		isRated: obj.is_archive,
 		canEdit: (
 			(Int(obj.author_id) == Int(user_id) || (ArrayOptFind(actions, "This == 'update'") != undefined)) && !obj.is_archive
 		),

@@ -39,16 +39,16 @@ class MyRate extends Component {
 					</span>
 				): (
 					<Popover
-					placement='leftTop'
-					content={
-						<span>
-							<div>Оценить</div>
-							<Rate value={text} onChange={this.handleChange} />
-						</span>
-					}
-				>
+						placement='leftTop'
+						content={
+							<span>
+								<div>Оценить</div>
+								<Rate value={text} onChange={this.handleChange} />
+							</span>
+						}
+					>
 					<span className={className}>
-						<Icon type='star' theme={disabled ? 'twoTone' : ''} twoToneColor={disabled ? '#ffd712' : ''} style={{ marginRight: 4 }} onClick={this.handleToggle}/>
+						<Icon type='star' theme='twoTone' twoToneColor='#ffd712' style={{ marginRight: 4 }} onClick={this.handleToggle}/>
 						{text}
 					</span>
 				</Popover>

@@ -86,8 +86,17 @@ class Idea extends Component {
 					): (
 						<div>
 							<PageHeader
+								className='idea__topic-container'
 								onBack={history.goBack}
-								title={<h3 className='idea__body_title'>{idea.topic_title} / {idea.title}</h3>}
+								title={
+									<div className='idea__topic'>
+										{idea.topic_image_id && <img className='idea__topic_image' src={`/download_file.html?file_id=${idea.topic_image_id}`} />}
+										<h3 className='idea__topic_title'>{idea.topic_title}</h3>
+									</div>
+								}
+							/>
+							<PageHeader
+								title={<h4 className='idea__body_title'>{idea.title}</h4>}
 								subTitle={
 									<span>
 										<span className='idea__header_author-fullname'>

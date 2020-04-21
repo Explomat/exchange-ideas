@@ -26,7 +26,7 @@ class Comment extends Component {
 	}
 
 	handleRemove(e) {
-		e.preventDefault();
+		//e.preventDefault();
 
 		const { id, onRemove } = this.props;
 
@@ -62,7 +62,7 @@ class Comment extends Component {
 	}
 
 	handleToggleEdit(e) {
-		e.preventDefault();
+		//e.preventDefault();
 
 		this.setState({
 			isEdit: !this.state.isEdit
@@ -70,7 +70,7 @@ class Comment extends Component {
 	}
 
 	handleToggleEditNew(e) {
-		e.preventDefault();
+		//e.preventDefault();
 
 		this.setState({
 			isNew: !this.state.isNew,
@@ -101,7 +101,7 @@ class Comment extends Component {
 						<Icon className='comment__avatar' type='user' />
 					)}
 					<span>
-						<a href={'/view_doc.html?mode=collaborator&object_id=' + author_id}>{author_fullname}</a>
+						<a target='__blank' href={'/view_doc.html?mode=collaborator&object_id=' + author_id}>{author_fullname}</a>
 						<span className='comment__publish-date'>{new Date(publish_date).toLocaleDateString('ru-RU', { hour: 'numeric', minute: 'numeric' })}</span>
 					</span>
 					<span className='comment__header_crud'>
