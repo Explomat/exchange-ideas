@@ -13,10 +13,11 @@
 	height: 100px;
 	display: inline-block;
 	margin-right: 12px;
+	float: left;
 }
 
 .idea__topic_title {
-	display: inline-block;
+	display: inline;
 }
 
 .ideas__ideas-list-container {
